@@ -1,0 +1,63 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+}
+
+#container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+#map {
+    width: 100vw;
+    flex-grow: 1;
+    box-shadow: 0 0 10px -2px black;
+}
+
+#toolbar {
+    width: 100vw;
+    height: 50px;
+    background-color: white;
+    display: flex;
+}
+
+.button {
+    display: inline-block;
+    height: 50px;
+    width: 50px;
+    background-color: white;
+    color: black;
+    background-repeat: no-repeat;
+    box-sizing: border-box;
+}
+
+.editButton {
+    display: none;
+    background-size: 50%;
+    background-position: center;
+}
+
+#addTpnButton {
+    background-image: url(../img/tpnButtonIcon.svg);
+}
+
+#addZtpButton {
+    background-image: url(../img/ztpButtonIcon.svg);
+}
+
+#binButton {
+    background-image: url(../img/binIcon.svg);
+}
+
+#switchModeButton {
+    background-image: url(../img/pencil.svg);
+    background-size: 50%;
+    background-position: center;
+}
+
+#saveButton {
+    background-image: url(../img/save.svg);
+}

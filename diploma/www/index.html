@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/index.css">
+        <script src="js/leaflet.js"></script>
+        <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+        <title>Leaflet example</title>
+    </head>
+    <body>
+        <div id="container">
+            <div id="toolbar">
+                <button id="switchModeButton" class="button" onclick="toggleMode()"></button>
+                <div style="width: 5px;"></div>
+                <button class="button editButton" id="addTpnButton" onclick="addTpn()"></button>
+                <div style="width: 5px;"></div>
+                <button class="button editButton" id="addZtpButton" onclick="addZtp()"></button>
+                <div style="width: 5px;"></div>
+                <button class="button editButton" id="binButton" onclick="deleteObject()"></button>
+                <div style="width: 5px;"></div>
+                <button class="button editButton" id="saveButton" onclick="saveFile()"></button>
+                <div style="width: 5px;"></div>
+                <button class="button editButton" id="newFileButton"></button>
+            </div>
+            <div id="map"></div>
+        </div>
+        <script type="text/javascript" src="js/index.js"></script>
+    </body>
+</html>

@@ -1,0 +1,31 @@
+{
+  "prepare_queue": {
+    "installed": [],
+    "uninstalled": []
+  },
+  "config_munge": {
+    "files": {}
+  },
+  "installed_plugins": {
+    "cordova-plugin-whitelist": {
+      "PACKAGE_NAME": "com.vladislav.diploma"
+    },
+    "cordova-plugin-geolocation": {
+      "PACKAGE_NAME": "com.vladislav.diploma"
+    },
+    "cordova-plugin-file": {
+      "PACKAGE_NAME": "com.vladislav.diploma"
+    },
+    "cordova-plugin-file-opener2": {
+      "ANDROID_SUPPORT_V4_VERSION": "27.+",
+      "PACKAGE_NAME": "com.vladislav.diploma"
+    },
+    "cordova-plugin-file-transfer": {
+      "PACKAGE_NAME": "com.vladislav.diploma"
+    },
+    "cordova-plugin-chooser": {
+      "PACKAGE_NAME": "com.vladislav.diploma"
+    }
+  },
+  "dependent_plugins": {}
+}
