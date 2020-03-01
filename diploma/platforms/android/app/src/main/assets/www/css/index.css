@@ -65,3 +65,7 @@
 #newFileButton {
     background-image: url(../img/newFile.svg);
 }
+
+#loadButton {
+    background-image: url(../img/load.svg);
+}
