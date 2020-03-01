@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
     <head>
+        <meta charset="utf-8">
         <link rel="stylesheet" href="css/leaflet.css">
         <link rel="stylesheet" href="css/index.css">
         <script src="js/leaflet.js"></script>
@@ -18,9 +19,11 @@
                 <div style="width: 5px;"></div>
                 <button class="button editButton" id="binButton" onclick="deleteObject()"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="saveButton" onclick="saveFile()"></button>
+                <button class="button editButton" id="saveButton" onclick="saveFile(false)"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="newFileButton"></button>
+                <button class="button editButton" id="newFileButton" onclick="saveFile(true)"></button>
+                <div style="width: 5px;"></div>
+                <button class="button editButton" id="loadButton" onclick="readNetworkFromFile()">load</button>
             </div>
             <div id="map"></div>
         </div>

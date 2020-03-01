@@ -61,3 +61,7 @@
 #saveButton {
     background-image: url(../img/save.svg);
 }
+
+#newFileButton {
+    background-image: url(../img/newFile.svg);
+}

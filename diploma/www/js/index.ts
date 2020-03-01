@@ -132,18 +132,69 @@ var circle = Leaflet.circle([0.0, 0.0], 0).addTo(map)
 locationMarker.addTo(map)
 
 document.addEventListener("deviceready", onDeviceReady, false);
-const PATH = "file:///storage/emulated/0"
+var PATH = "file:///storage/emulated/0"
 var resolveLocalFileSystemURL
 var chooser
 
 function onDeviceReady() {
     chooser = window['chooser']
     resolveLocalFileSystemURL = window['resolveLocalFileSystemURL']
+    resolveLocalFileSystemURL(PATH, function(dir) {
+        dir.getDirectory("Diploma", {create:true}, function(dir) {})
+    })
+    PATH = "file:///storage/emulated/0/Diploma"
+}
+
+
+// def methods
+map.on('click', onMapClick)
+map.on('locationfound', onLocationFound)
+map.locate({watch: true, setView: false})
+
+function saveFile(createNew: boolean) {
+    if (createNew) {
+        let fileName = prompt("Введите имя файла для сохранения") + ".json"
+        resolveLocalFileSystemURL(PATH, function(dir) {
+            dir.getFile(fileName, {create:true}, function(fileEntry) {
+                let json = JSON.stringify(network)
+                fileEntry.createWriter(function (fileWriter) {
+                    fileWriter.onerror = function (e) {
+                        alert("Failed file write: " + e.toString())
+                    }
+                    const dataObj = new Blob([json], { type: 'text/plain' })
+            
+                    fileWriter.write(dataObj)
+                })
+            })
+        })
+    } else {
+        chooser
+            .getFile()
+            .then(
+                file => {
+                    resolveLocalFileSystemURL(PATH, function(dir) {
+                        dir.getFile(file.name, {create:true}, function(fileEntry) {
+                            let json = JSON.stringify(network)
+                            fileEntry.createWriter(function (fileWriter) {
+                                fileWriter.onerror = function (e) {
+                                    alert("Failed file write: " + e.toString())
+                                }
+                                const dataObj = new Blob([json], { type: 'text/plain' })
+                        
+                                fileWriter.write(dataObj)
+                            })
+                        })
+                    })
+                }
+            )
+    }
+}
+
+function readNetworkFromFile() {
     chooser
         .getFile()
         .then(
             file => {
-                alert(JSON.stringify(file))
                 resolveLocalFileSystemURL(PATH, function(dir) {
                     dir.getFile(file.name, {create:true}, function(fileEntry) {
                         fileEntry.file(function (file) {
@@ -162,36 +213,8 @@ function onDeviceReady() {
         )
 }
 
-
-// def methods
-map.on('click', onMapClick)
-map.on('locationfound', onLocationFound)
-map.locate({watch: true, setView: false})
-
-function saveFile() {
-    chooser
-        .getFile()
-        .then(
-            file => {
-                resolveLocalFileSystemURL(PATH, function(dir) {
-                    dir.getFile(file.name, {create:true}, function(fileEntry) {
-                        let json = JSON.stringify(network)
-                        fileEntry.createWriter(function (fileWriter) {
-                            fileWriter.onerror = function (e) {
-                                alert("Failed file write: " + e.toString())
-                            }
-                            const dataObj = new Blob([json], { type: 'text/plain' })
-                    
-                            fileWriter.write(dataObj)
-                        })
-                    })
-                })
-            }
-        )
-}
-
 function loadNetwork(networkData: string) {
-    let network: Network = JSON.parse(networkData)
+    network = JSON.parse(networkData)
     objectLayer.clearLayers()
     network.ztps.forEach(
         ztp => {

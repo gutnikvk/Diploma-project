@@ -142,9 +142,54 @@ var chooser;
 function onDeviceReady() {
     chooser = window['chooser'];
     resolveLocalFileSystemURL = window['resolveLocalFileSystemURL'];
-    chooser.getFile()
+    resolveLocalFileSystemURL(PATH, function (dir) {
+        dir.getDirectory("Diploma", { create: true }, function (dir) { });
+    });
+    PATH = "file:///storage/emulated/0/Diploma";
+}
+// def methods
+map.on('click', onMapClick);
+map.on('locationfound', onLocationFound);
+map.locate({ watch: true, setView: false });
+function saveFile(createNew) {
+    if (createNew) {
+        var fileName_1 = prompt("Введите имя файла для сохранения") + ".json";
+        resolveLocalFileSystemURL(PATH, function (dir) {
+            dir.getFile(fileName_1, { create: true }, function (fileEntry) {
+                var json = JSON.stringify(network);
+                fileEntry.createWriter(function (fileWriter) {
+                    fileWriter.onerror = function (e) {
+                        alert("Failed file write: " + e.toString());
+                    };
+                    var dataObj = new Blob([json], { type: 'text/plain' });
+                    fileWriter.write(dataObj);
+                });
+            });
+        });
+    }
+    else {
+        chooser
+            .getFile()
+            .then(function (file) {
+            resolveLocalFileSystemURL(PATH, function (dir) {
+                dir.getFile(file.name, { create: true }, function (fileEntry) {
+                    var json = JSON.stringify(network);
+                    fileEntry.createWriter(function (fileWriter) {
+                        fileWriter.onerror = function (e) {
+                            alert("Failed file write: " + e.toString());
+                        };
+                        var dataObj = new Blob([json], { type: 'text/plain' });
+                        fileWriter.write(dataObj);
+                    });
+                });
+            });
+        });
+    }
+}
+function readNetworkFromFile() {
+    chooser
+        .getFile()
         .then(function (file) {
-        alert(JSON.stringify(file));
         resolveLocalFileSystemURL(PATH, function (dir) {
             dir.getFile(file.name, { create: true }, function (fileEntry) {
                 fileEntry.file(function (file) {
@@ -161,29 +206,8 @@ function onDeviceReady() {
         });
     });
 }
-// def methods
-map.on('click', onMapClick);
-map.on('locationfound', onLocationFound);
-map.locate({ watch: true, setView: false });
-function saveFile() {
-    chooser.getFile()
-        .then(function (file) {
-        resolveLocalFileSystemURL(PATH, function (dir) {
-            dir.getFile(file.name, { create: true }, function (fileEntry) {
-                var json = JSON.stringify(network);
-                fileEntry.createWriter(function (fileWriter) {
-                    fileWriter.onerror = function (e) {
-                        alert("Failed file write: " + e.toString());
-                    };
-                    var dataObj = new Blob([json], { type: 'text/plain' });
-                    fileWriter.write(dataObj);
-                });
-            });
-        });
-    });
-}
 function loadNetwork(networkData) {
-    var network = JSON.parse(networkData);
+    network = JSON.parse(networkData);
     objectLayer.clearLayers();
     network.ztps.forEach(function (ztp) {
         var buildingMarker = Leaflet.marker([ztp.coordinates.x, ztp.coordinates.y], {
