@@ -505,7 +505,8 @@ function onObjectClick() {
                         color: "green",
                         weight: '2',
                         dashArray: '5, 4',
-                        id: ++network.maxId
+                        id: ++network.maxId,
+                        type: AddingObject.AIR_LINE
                     }
                 ).on('click', onObjectClick).addTo(map)
                 network.lines.set(
