@@ -79,17 +79,19 @@ class Rp extends Building {
 }
 const Leaflet = window['L']
 var editMode = false
-enum AddingBuilding {
+enum AddingObject {
     ZTP,
     RP,
     SUB_STATION,
     TPN,
     RECLOSER,
     DELIMITER,
+    PILLAR,
     NONE,
     DELETE
 }
-var addingBuilding: AddingBuilding = AddingBuilding.NONE
+var addingObject: AddingObject = AddingObject.NONE
+
 const map = Leaflet.map('map').setView([55.75, 37.62], 15);
 const objectLayer = Leaflet.layerGroup().addTo(map)
 const tpnIcon = Leaflet.icon(
@@ -102,6 +104,12 @@ const ztpIcon = Leaflet.icon(
     {
         iconUrl: './img/ztpIcon.svg',
         iconAnchor: [10, 10]
+    }
+)
+const pillarIcon = Leaflet.icon(
+    {
+        iconUrl: './img/pillarIcon.svg',
+        iconAnchor: [4, 4]
     }
 )
 var network = new Network(
@@ -251,7 +259,7 @@ function toggleMode() {
         document.getElementById("switchModeButton").style.borderBottom = "none"
         setEditButtonsBorders("none")
         setEditButtonsDisplay("none")
-        addingBuilding = AddingBuilding.NONE
+        addingObject = AddingObject.NONE
     } else {
         document.getElementById("switchModeButton").style.borderBottom = "5px solid #8de3e3"
         setEditButtonsDisplay("inline-block")
@@ -261,31 +269,41 @@ function toggleMode() {
 
 function addTpn() {
     setEditButtonsBorders("none")
-    if (addingBuilding != AddingBuilding.TPN) {
-        addingBuilding = AddingBuilding.TPN
+    if (addingObject != AddingObject.TPN) {
+        addingObject = AddingObject.TPN
         document.getElementById("addTpnButton").style.borderBottom = "5px solid #8de3e3"
     } else {
-        addingBuilding = AddingBuilding.NONE
+        addingObject = AddingObject.NONE
     }
 }
 
 function addZtp() {
     setEditButtonsBorders("none")
-    if (addingBuilding != AddingBuilding.ZTP) {
-        addingBuilding = AddingBuilding.ZTP
+    if (addingObject != AddingObject.ZTP) {
+        addingObject = AddingObject.ZTP
         document.getElementById("addZtpButton").style.borderBottom = "5px solid #8de3e3"
     } else {
-        addingBuilding = AddingBuilding.NONE
+        addingObject = AddingObject.NONE
+    }
+}
+
+function addPillar() {
+    setEditButtonsBorders("none")
+    if (addingObject != AddingObject.PILLAR) {
+        addingObject = AddingObject.PILLAR
+        document.getElementById("addPillarButton").style.borderBottom = "5px solid #8de3e3"
+    } else {
+        addingObject = AddingObject.NONE
     }
 }
 
 function deleteObject() {
     setEditButtonsBorders("none")
-    if (addingBuilding != AddingBuilding.DELETE) {
-        addingBuilding = AddingBuilding.DELETE
+    if (addingObject != AddingObject.DELETE) {
+        addingObject = AddingObject.DELETE
         document.getElementById("binButton").style.borderBottom = "5px solid #8de3e3"
     } else {
-        addingBuilding = AddingBuilding.NONE
+        addingObject = AddingObject.NONE
     }
 }
 
@@ -308,8 +326,8 @@ function setEditButtonsDisplay(display: String) {
 function onMapClick(e) {
     if (editMode) {
         var buildingMarker
-        switch (addingBuilding) {
-            case AddingBuilding.TPN:
+        switch (addingObject) {
+            case AddingObject.TPN:
                 buildingMarker = Leaflet.marker(
                     e.latlng, 
                     {
@@ -322,7 +340,7 @@ function onMapClick(e) {
                     )
                 )
                 break
-            case AddingBuilding.ZTP:
+            case AddingObject.ZTP:
                 buildingMarker = Leaflet.marker(
                     e.latlng,
                     {
@@ -335,19 +353,29 @@ function onMapClick(e) {
                     )
                 )
                 break
-            case AddingBuilding.DELETE:
-                
+            case AddingObject.PILLAR:
+                buildingMarker = Leaflet.marker(
+                    e.latlng, 
+                    {
+                        icon: pillarIcon
+                    }
+                ).on('click', onObjectClick)
+                network.pillars.push(
+                    new Pillar(
+                        new PointCoordinates(e.latlng.lat, e.latlng.lng)
+                    )
+                )
                 break
+            case AddingObject.DELETE: break
         }
-        if (addingBuilding != AddingBuilding.NONE
-            && addingBuilding != AddingBuilding.DELETE) {
+        if (buildingMarker) {
                 buildingMarker.addTo(objectLayer)
             }
     }
 }
 
 function onObjectClick() {
-    if (addingBuilding == AddingBuilding.DELETE) {
+    if (addingObject == AddingObject.DELETE) {
         map.removeLayer(this)
     }
 }

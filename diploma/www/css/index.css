@@ -48,6 +48,10 @@
     background-image: url(../img/ztpButtonIcon.svg);
 }
 
+#addPillarButton {
+    background-image: url(../img/pillarButtonIcon.svg);
+}
+
 #binButton {
     background-image: url(../img/binIcon.svg);
 }

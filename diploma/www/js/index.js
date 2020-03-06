@@ -104,8 +104,9 @@ var AddingBuilding;
     AddingBuilding[AddingBuilding["TPN"] = 3] = "TPN";
     AddingBuilding[AddingBuilding["RECLOSER"] = 4] = "RECLOSER";
     AddingBuilding[AddingBuilding["DELIMITER"] = 5] = "DELIMITER";
-    AddingBuilding[AddingBuilding["NONE"] = 6] = "NONE";
-    AddingBuilding[AddingBuilding["DELETE"] = 7] = "DELETE";
+    AddingBuilding[AddingBuilding["PILLAR"] = 6] = "PILLAR";
+    AddingBuilding[AddingBuilding["NONE"] = 7] = "NONE";
+    AddingBuilding[AddingBuilding["DELETE"] = 8] = "DELETE";
 })(AddingBuilding || (AddingBuilding = {}));
 var addingBuilding = AddingBuilding.NONE;
 var map = Leaflet.map('map').setView([55.75, 37.62], 15);
@@ -117,6 +118,10 @@ var tpnIcon = Leaflet.icon({
 var ztpIcon = Leaflet.icon({
     iconUrl: './img/ztpIcon.svg',
     iconAnchor: [10, 10]
+});
+var pillarIcon = Leaflet.icon({
+    iconUrl: './img/pillarIcon.svg',
+    iconAnchor: [4, 4]
 });
 var network = new Network("network1");
 // init map layers
@@ -260,6 +265,16 @@ function addZtp() {
         addingBuilding = AddingBuilding.NONE;
     }
 }
+function addPillar() {
+    setEditButtonsBorders("none");
+    if (addingBuilding != AddingBuilding.PILLAR) {
+        addingBuilding = AddingBuilding.PILLAR;
+        document.getElementById("addPillarButton").style.borderBottom = "5px solid #8de3e3";
+    }
+    else {
+        addingBuilding = AddingBuilding.NONE;
+    }
+}
 function deleteObject() {
     setEditButtonsBorders("none");
     if (addingBuilding != AddingBuilding.DELETE) {
@@ -300,11 +315,15 @@ function onMapClick(e) {
                 }).on('click', onObjectClick);
                 network.ztps.push(new Ztp(new PointCoordinates(e.latlng.lat, e.latlng.lng)));
                 break;
-            case AddingBuilding.DELETE:
+            case AddingBuilding.PILLAR:
+                buildingMarker = Leaflet.marker(e.latlng, {
+                    icon: pillarIcon
+                }).on('click', onObjectClick);
+                network.pillars.push(new Pillar(new PointCoordinates(e.latlng.lat, e.latlng.lng)));
                 break;
+            case AddingBuilding.DELETE: break;
         }
-        if (addingBuilding != AddingBuilding.NONE
-            && addingBuilding != AddingBuilding.DELETE) {
+        if (buildingMarker) {
             buildingMarker.addTo(objectLayer);
         }
     }
