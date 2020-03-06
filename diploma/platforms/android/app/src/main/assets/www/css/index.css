@@ -48,6 +48,18 @@
     background-image: url(../img/ztpButtonIcon.svg);
 }
 
+#addPillarButton {
+    background-image: url(../img/pillarButtonIcon.svg);
+}
+
+#addAirLineButton {
+    background-image: url(../img/airLineButtonIcon.svg);
+}
+
+#addCableLineButton {
+    background-image: url(../img/cableLineButtonIcon.svg);
+}
+
 #binButton {
     background-image: url(../img/binIcon.svg);
 }

@@ -8,23 +8,27 @@ class PointCoordinates {
     }
 }
 class Network {
-    id: String
-    subStations: Array<SubStation>
-    rps: Array<Rp>
-    reclosers: Array<Recloser>
-    delimiters: Array<Delimiter>
-    ztps: Array<Ztp>
-    tpns: Array<Tpn>
-    pillars: Array<Pillar>
+    id: string
+    subStations: Map<number, SubStation>
+    rps: Map<number, Rp>
+    reclosers: Map<number, Recloser>
+    delimiters: Map<number, Delimiter>
+    ztps: Map<number, Ztp>
+    tpns: Map<number, Tpn>
+    pillars: Map<number, Pillar>
+    lines: Map<number, Line>
+    maxId: number
     constructor(
-        id: String, 
-        subStations: Array<SubStation> = new Array(),
-        rps: Array<Rp> = new Array(),
-        reclosers: Array<Recloser> = new Array(),
-        delimiters: Array<Delimiter> = new Array(),
-        ztps: Array<Ztp> = new Array(),
-        tpns: Array<Tpn> = new Array(),
-        pillars: Array<Pillar> = new Array()
+        id: string, 
+        subStations: Map<number, SubStation> = new Map(),
+        rps: Map<number, Rp> = new Map(),
+        reclosers: Map<number, Recloser> = new Map(),
+        delimiters: Map<number, Delimiter> = new Map(),
+        ztps: Map<number, Ztp> = new Map(),
+        tpns: Map<number, Tpn> = new Map(),
+        pillars: Map<number, Pillar> = new Map(),
+        lines: Map<number, Line> = new Map(),
+        maxId: number = 0
     ) {
         this.id = id
         this.subStations = subStations
@@ -34,62 +38,91 @@ class Network {
         this.ztps = ztps
         this.tpns = tpns
         this.pillars = pillars
+        this.lines = lines
+        this.maxId = maxId
     }
 }
 class Building {
+    id: number
     coordinates: PointCoordinates
-    constructor(coordinates: PointCoordinates) {
+    constructor(id: number, coordinates: PointCoordinates) {
+        this.id = id
         this.coordinates = coordinates
     }
 }
 class SubStation extends Building {
-    constructor(coordinates: PointCoordinates) {
-        super(coordinates)
+    constructor(id: number, coordinates: PointCoordinates) {
+        super(id, coordinates)
     }
 }
 class Ztp extends Building {
-    constructor(coordinates: PointCoordinates) {
-        super(coordinates)
+    constructor(id: number, coordinates: PointCoordinates) {
+        super(id, coordinates)
     }
 }
 class Pillar extends Building {
-    constructor(coordinates: PointCoordinates) {
-        super(coordinates)
+    constructor(id: number, coordinates: PointCoordinates) {
+        super(id, coordinates)
     }
 }
 class Recloser extends Building {
-    constructor(coordinates: PointCoordinates) {
-        super(coordinates)
+    constructor(id: number, coordinates: PointCoordinates) {
+        super(id, coordinates)
     }
 }
 class Delimiter extends Building {
-    constructor(coordinates: PointCoordinates) {
-        super(coordinates)
+    constructor(id: number, coordinates: PointCoordinates) {
+        super(id, coordinates)
     }
 }
 class Tpn extends Building {
-    constructor(coordinates: PointCoordinates) {
-        super(coordinates)
+    constructor(id: number, coordinates: PointCoordinates) {
+        super(id, coordinates)
     }
 }
 class Rp extends Building {
-    constructor(coordinates: PointCoordinates) {
-        super(coordinates)
+    constructor(id: number, coordinates: PointCoordinates) {
+        super(id, coordinates)
+    }
+}
+class Line {
+    id: number
+    point1Coordinates: PointCoordinates
+    point2Coordinates: PointCoordinates
+    constructor(id: number, point1Coordinates: PointCoordinates, point2Coordinates: PointCoordinates) {
+        this.id = id
+        this.point1Coordinates = point1Coordinates
+        this.point2Coordinates = point2Coordinates
+    }
+}
+class AirLine extends Line {
+    constructor(id: number, point1Coordinates: PointCoordinates, point2Coordinates: PointCoordinates) {
+        super(id, point1Coordinates, point2Coordinates)
+    }
+}
+class CableLine extends Line {
+    constructor(id: number, point1Coordinates: PointCoordinates, point2Coordinates: PointCoordinates) {
+        super(id, point1Coordinates, point2Coordinates)
     }
 }
 const Leaflet = window['L']
 var editMode = false
-enum AddingBuilding {
+enum AddingObject {
     ZTP,
     RP,
     SUB_STATION,
     TPN,
     RECLOSER,
     DELIMITER,
+    PILLAR,
+    AIR_LINE,
+    CABLE_LINE,
     NONE,
     DELETE
 }
-var addingBuilding: AddingBuilding = AddingBuilding.NONE
+var addingObject: AddingObject = AddingObject.NONE
+var linePoint1: PointCoordinates
+var linePoint2: PointCoordinates
 const map = Leaflet.map('map').setView([55.75, 37.62], 15);
 const objectLayer = Leaflet.layerGroup().addTo(map)
 const tpnIcon = Leaflet.icon(
@@ -102,6 +135,12 @@ const ztpIcon = Leaflet.icon(
     {
         iconUrl: './img/ztpIcon.svg',
         iconAnchor: [10, 10]
+    }
+)
+const pillarIcon = Leaflet.icon(
+    {
+        iconUrl: './img/pillarIcon.svg',
+        iconAnchor: [4, 4]
     }
 )
 var network = new Network(
@@ -218,24 +257,59 @@ function loadNetwork(networkData: string) {
     objectLayer.clearLayers()
     network.ztps.forEach(
         ztp => {
-            let buildingMarker = Leaflet.marker(
+            Leaflet.marker(
                 [ztp.coordinates.x, ztp.coordinates.y],
                 {
-                    icon: ztpIcon
+                    icon: ztpIcon,
+                    id: ztp.id,
+                    type: AddingObject.ZTP
                 }
             ).on('click', onObjectClick)
-            buildingMarker.addTo(objectLayer)
+            .addTo(objectLayer)
         }
     )
     network.tpns.forEach(
         tpn => {
-            let buildingMarker = Leaflet.marker(
+            Leaflet.marker(
                 [tpn.coordinates.x, tpn.coordinates.y],
                 {
-                    icon: tpnIcon
+                    icon: tpnIcon,
+                    id: tpn.id,
+                    type: AddingObject.TPN
                 }
             ).on('click', onObjectClick)
-            buildingMarker.addTo(objectLayer)
+            .addTo(objectLayer)
+        }
+    )
+    network.pillars.forEach(
+        pillar => {
+            Leaflet.marker(
+                [pillar.coordinates.x, pillar.coordinates.y],
+                {
+                    icon: pillarIcon,
+                    id: pillar.id,
+                    type: AddingObject.PILLAR
+                }
+            ).on('click', onObjectClick)
+            .addTo(objectLayer)
+        }
+    )
+    network.lines.forEach(
+        line => {
+            if (line instanceof AirLine) {
+                Leaflet.polyline(
+                    [
+                        [line.point1Coordinates.x, line.point1Coordinates.y],
+                        [line.point2Coordinates.x, line.point2Coordinates.y]
+                    ],
+                    {
+                        color: "green",
+                        weight: '2',
+                        dashArray: '5, 4',
+                        id: line.id
+                    }
+                ).on('click', onObjectClick).addTo(map)
+            }
         }
     )
 }
@@ -251,7 +325,7 @@ function toggleMode() {
         document.getElementById("switchModeButton").style.borderBottom = "none"
         setEditButtonsBorders("none")
         setEditButtonsDisplay("none")
-        addingBuilding = AddingBuilding.NONE
+        addingObject = AddingObject.NONE
     } else {
         document.getElementById("switchModeButton").style.borderBottom = "5px solid #8de3e3"
         setEditButtonsDisplay("inline-block")
@@ -261,31 +335,61 @@ function toggleMode() {
 
 function addTpn() {
     setEditButtonsBorders("none")
-    if (addingBuilding != AddingBuilding.TPN) {
-        addingBuilding = AddingBuilding.TPN
+    if (addingObject != AddingObject.TPN) {
+        addingObject = AddingObject.TPN
         document.getElementById("addTpnButton").style.borderBottom = "5px solid #8de3e3"
     } else {
-        addingBuilding = AddingBuilding.NONE
+        addingObject = AddingObject.NONE
     }
 }
 
 function addZtp() {
     setEditButtonsBorders("none")
-    if (addingBuilding != AddingBuilding.ZTP) {
-        addingBuilding = AddingBuilding.ZTP
+    if (addingObject != AddingObject.ZTP) {
+        addingObject = AddingObject.ZTP
         document.getElementById("addZtpButton").style.borderBottom = "5px solid #8de3e3"
     } else {
-        addingBuilding = AddingBuilding.NONE
+        addingObject = AddingObject.NONE
+    }
+}
+
+function addPillar() {
+    setEditButtonsBorders("none")
+    if (addingObject != AddingObject.PILLAR) {
+        addingObject = AddingObject.PILLAR
+        document.getElementById("addPillarButton").style.borderBottom = "5px solid #8de3e3"
+    } else {
+        addingObject = AddingObject.NONE
+    }
+}
+
+function addAirLine() {
+    setEditButtonsBorders("none")
+    if (addingObject != AddingObject.AIR_LINE) {
+        addingObject = AddingObject.AIR_LINE
+        document.getElementById("addAirLineButton").style.borderBottom = "5px solid #8de3e3"
+    } else {
+        addingObject = AddingObject.NONE
+    }
+}
+
+function addCableLine() {
+    setEditButtonsBorders("none")
+    if (addingObject != AddingObject.CABLE_LINE) {
+        addingObject = AddingObject.CABLE_LINE
+        document.getElementById("addCableLineButton").style.borderBottom = "5px solid #8de3e3"
+    } else {
+        addingObject = AddingObject.NONE
     }
 }
 
 function deleteObject() {
     setEditButtonsBorders("none")
-    if (addingBuilding != AddingBuilding.DELETE) {
-        addingBuilding = AddingBuilding.DELETE
+    if (addingObject != AddingObject.DELETE) {
+        addingObject = AddingObject.DELETE
         document.getElementById("binButton").style.borderBottom = "5px solid #8de3e3"
     } else {
-        addingBuilding = AddingBuilding.NONE
+        addingObject = AddingObject.NONE
     }
 }
 
@@ -308,46 +412,113 @@ function setEditButtonsDisplay(display: String) {
 function onMapClick(e) {
     if (editMode) {
         var buildingMarker
-        switch (addingBuilding) {
-            case AddingBuilding.TPN:
+        switch (addingObject) {
+            case AddingObject.TPN:
                 buildingMarker = Leaflet.marker(
                     e.latlng, 
                     {
-                        icon: tpnIcon
+                        icon: tpnIcon,
+                        id: ++network.maxId,
+                        type: AddingObject.TPN
                     }
                 ).on('click', onObjectClick)
-                network.tpns.push(
+                network.tpns.set(
+                    network.maxId, 
                     new Tpn(
+                        network.maxId,
                         new PointCoordinates(e.latlng.lat, e.latlng.lng)
                     )
                 )
                 break
-            case AddingBuilding.ZTP:
+            case AddingObject.ZTP:
                 buildingMarker = Leaflet.marker(
                     e.latlng,
                     {
-                        icon: ztpIcon
+                        icon: ztpIcon,
+                        id: ++network.maxId,
+                        type: AddingObject.ZTP
                     }
                 ).on('click', onObjectClick)
-                network.ztps.push(
+                network.ztps.set(
+                    network.maxId, 
                     new Ztp(
+                        network.maxId,
                         new PointCoordinates(e.latlng.lat, e.latlng.lng)
                     )
                 )
                 break
-            case AddingBuilding.DELETE:
-                
+            case AddingObject.PILLAR:
+                buildingMarker = Leaflet.marker(
+                    e.latlng, 
+                    {
+                        icon: pillarIcon,
+                        id: ++network.maxId,
+                        type: AddingObject.PILLAR
+                    }
+                ).on('click', onObjectClick)
+                network.pillars.set(
+                    network.maxId, 
+                    new Pillar(
+                        network.maxId,
+                        new PointCoordinates(e.latlng.lat, e.latlng.lng)
+                    )
+                )
                 break
+            default: break
         }
-        if (addingBuilding != AddingBuilding.NONE
-            && addingBuilding != AddingBuilding.DELETE) {
+        if (buildingMarker) {
                 buildingMarker.addTo(objectLayer)
             }
     }
 }
 
 function onObjectClick() {
-    if (addingBuilding == AddingBuilding.DELETE) {
-        map.removeLayer(this)
+    switch (addingObject) {
+        case AddingObject.DELETE:
+            map.removeLayer(this)
+            switch (this.options.type) {
+                case AddingObject.TPN:
+                    network.tpns.delete(this.options.id)
+                    break
+                case AddingObject.ZTP:
+                    network.ztps.delete(this.options.id)
+                    break
+                case AddingObject.PILLAR:
+                    network.pillars.delete(this.options.id)
+                    break
+                case AddingObject.AIR_LINE:
+                    network.lines.delete(this.options.id)
+                    break
+            }
+            break
+        case AddingObject.AIR_LINE:
+            if (!linePoint1) { // point 1 is undefined
+                linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
+            } else {
+                linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
+                Leaflet.polyline(
+                    [
+                        [linePoint1.x, linePoint1.y],
+                        [linePoint2.x, linePoint2.y]
+                    ],
+                    {
+                        color: "green",
+                        weight: '2',
+                        dashArray: '5, 4',
+                        id: ++network.maxId
+                    }
+                ).on('click', onObjectClick).addTo(map)
+                network.lines.set(
+                    network.maxId, 
+                    new AirLine(
+                        network.maxId,
+                        linePoint1,
+                        linePoint2
+                    )
+                )
+                linePoint1 = undefined
+                linePoint2 = undefined
+            }
+            break
     }
 }

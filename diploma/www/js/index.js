@@ -20,14 +20,16 @@ var PointCoordinates = /** @class */ (function () {
     return PointCoordinates;
 }());
 var Network = /** @class */ (function () {
-    function Network(id, subStations, rps, reclosers, delimiters, ztps, tpns, pillars) {
-        if (subStations === void 0) { subStations = new Array(); }
-        if (rps === void 0) { rps = new Array(); }
-        if (reclosers === void 0) { reclosers = new Array(); }
-        if (delimiters === void 0) { delimiters = new Array(); }
-        if (ztps === void 0) { ztps = new Array(); }
-        if (tpns === void 0) { tpns = new Array(); }
-        if (pillars === void 0) { pillars = new Array(); }
+    function Network(id, subStations, rps, reclosers, delimiters, ztps, tpns, pillars, lines, maxId) {
+        if (subStations === void 0) { subStations = new Map(); }
+        if (rps === void 0) { rps = new Map(); }
+        if (reclosers === void 0) { reclosers = new Map(); }
+        if (delimiters === void 0) { delimiters = new Map(); }
+        if (ztps === void 0) { ztps = new Map(); }
+        if (tpns === void 0) { tpns = new Map(); }
+        if (pillars === void 0) { pillars = new Map(); }
+        if (lines === void 0) { lines = new Map(); }
+        if (maxId === void 0) { maxId = 0; }
         this.id = id;
         this.subStations = subStations;
         this.rps = rps;
@@ -36,79 +38,108 @@ var Network = /** @class */ (function () {
         this.ztps = ztps;
         this.tpns = tpns;
         this.pillars = pillars;
+        this.lines = lines;
+        this.maxId = maxId;
     }
     return Network;
 }());
 var Building = /** @class */ (function () {
-    function Building(coordinates) {
+    function Building(id, coordinates) {
+        this.id = id;
         this.coordinates = coordinates;
     }
     return Building;
 }());
 var SubStation = /** @class */ (function (_super) {
     __extends(SubStation, _super);
-    function SubStation(coordinates) {
-        return _super.call(this, coordinates) || this;
+    function SubStation(id, coordinates) {
+        return _super.call(this, id, coordinates) || this;
     }
     return SubStation;
 }(Building));
 var Ztp = /** @class */ (function (_super) {
     __extends(Ztp, _super);
-    function Ztp(coordinates) {
-        return _super.call(this, coordinates) || this;
+    function Ztp(id, coordinates) {
+        return _super.call(this, id, coordinates) || this;
     }
     return Ztp;
 }(Building));
 var Pillar = /** @class */ (function (_super) {
     __extends(Pillar, _super);
-    function Pillar(coordinates) {
-        return _super.call(this, coordinates) || this;
+    function Pillar(id, coordinates) {
+        return _super.call(this, id, coordinates) || this;
     }
     return Pillar;
 }(Building));
 var Recloser = /** @class */ (function (_super) {
     __extends(Recloser, _super);
-    function Recloser(coordinates) {
-        return _super.call(this, coordinates) || this;
+    function Recloser(id, coordinates) {
+        return _super.call(this, id, coordinates) || this;
     }
     return Recloser;
 }(Building));
 var Delimiter = /** @class */ (function (_super) {
     __extends(Delimiter, _super);
-    function Delimiter(coordinates) {
-        return _super.call(this, coordinates) || this;
+    function Delimiter(id, coordinates) {
+        return _super.call(this, id, coordinates) || this;
     }
     return Delimiter;
 }(Building));
 var Tpn = /** @class */ (function (_super) {
     __extends(Tpn, _super);
-    function Tpn(coordinates) {
-        return _super.call(this, coordinates) || this;
+    function Tpn(id, coordinates) {
+        return _super.call(this, id, coordinates) || this;
     }
     return Tpn;
 }(Building));
 var Rp = /** @class */ (function (_super) {
     __extends(Rp, _super);
-    function Rp(coordinates) {
-        return _super.call(this, coordinates) || this;
+    function Rp(id, coordinates) {
+        return _super.call(this, id, coordinates) || this;
     }
     return Rp;
 }(Building));
+var Line = /** @class */ (function () {
+    function Line(id, point1Coordinates, point2Coordinates) {
+        this.id = id;
+        this.point1Coordinates = point1Coordinates;
+        this.point2Coordinates = point2Coordinates;
+    }
+    return Line;
+}());
+var AirLine = /** @class */ (function (_super) {
+    __extends(AirLine, _super);
+    function AirLine(id, point1Coordinates, point2Coordinates) {
+        return _super.call(this, id, point1Coordinates, point2Coordinates) || this;
+    }
+    return AirLine;
+}(Line));
+var CableLine = /** @class */ (function (_super) {
+    __extends(CableLine, _super);
+    function CableLine(id, point1Coordinates, point2Coordinates) {
+        return _super.call(this, id, point1Coordinates, point2Coordinates) || this;
+    }
+    return CableLine;
+}(Line));
 var Leaflet = window['L'];
 var editMode = false;
-var AddingBuilding;
-(function (AddingBuilding) {
-    AddingBuilding[AddingBuilding["ZTP"] = 0] = "ZTP";
-    AddingBuilding[AddingBuilding["RP"] = 1] = "RP";
-    AddingBuilding[AddingBuilding["SUB_STATION"] = 2] = "SUB_STATION";
-    AddingBuilding[AddingBuilding["TPN"] = 3] = "TPN";
-    AddingBuilding[AddingBuilding["RECLOSER"] = 4] = "RECLOSER";
-    AddingBuilding[AddingBuilding["DELIMITER"] = 5] = "DELIMITER";
-    AddingBuilding[AddingBuilding["PILLAR"] = 6] = "PILLAR";
-    AddingBuilding[AddingBuilding["NONE"] = 7] = "NONE";
-    AddingBuilding[AddingBuilding["DELETE"] = 8] = "DELETE";
-})(AddingBuilding || (AddingBuilding = {}));
-var addingBuilding = AddingBuilding.NONE;
+var AddingObject;
+(function (AddingObject) {
+    AddingObject[AddingObject["ZTP"] = 0] = "ZTP";
+    AddingObject[AddingObject["RP"] = 1] = "RP";
+    AddingObject[AddingObject["SUB_STATION"] = 2] = "SUB_STATION";
+    AddingObject[AddingObject["TPN"] = 3] = "TPN";
+    AddingObject[AddingObject["RECLOSER"] = 4] = "RECLOSER";
+    AddingObject[AddingObject["DELIMITER"] = 5] = "DELIMITER";
+    AddingObject[AddingObject["PILLAR"] = 6] = "PILLAR";
+    AddingObject[AddingObject["AIR_LINE"] = 7] = "AIR_LINE";
+    AddingObject[AddingObject["CABLE_LINE"] = 8] = "CABLE_LINE";
+    AddingObject[AddingObject["NONE"] = 9] = "NONE";
+    AddingObject[AddingObject["DELETE"] = 10] = "DELETE";
+})(AddingObject || (AddingObject = {}));
+var addingObject = AddingObject.NONE;
+var linePoint1;
+var linePoint2;
 var map = Leaflet.map('map').setView([55.75, 37.62], 15);
 var objectLayer = Leaflet.layerGroup().addTo(map);
 var tpnIcon = Leaflet.icon({
@@ -215,16 +246,41 @@ function loadNetwork(networkData) {
     network = JSON.parse(networkData);
     objectLayer.clearLayers();
     network.ztps.forEach(function (ztp) {
-        var buildingMarker = Leaflet.marker([ztp.coordinates.x, ztp.coordinates.y], {
-            icon: ztpIcon
-        }).on('click', onObjectClick);
-        buildingMarker.addTo(objectLayer);
+        Leaflet.marker([ztp.coordinates.x, ztp.coordinates.y], {
+            icon: ztpIcon,
+            id: ztp.id,
+            type: AddingObject.ZTP
+        }).on('click', onObjectClick)
+            .addTo(objectLayer);
     });
     network.tpns.forEach(function (tpn) {
-        var buildingMarker = Leaflet.marker([tpn.coordinates.x, tpn.coordinates.y], {
-            icon: tpnIcon
-        }).on('click', onObjectClick);
-        buildingMarker.addTo(objectLayer);
+        Leaflet.marker([tpn.coordinates.x, tpn.coordinates.y], {
+            icon: tpnIcon,
+            id: tpn.id,
+            type: AddingObject.TPN
+        }).on('click', onObjectClick)
+            .addTo(objectLayer);
+    });
+    network.pillars.forEach(function (pillar) {
+        Leaflet.marker([pillar.coordinates.x, pillar.coordinates.y], {
+            icon: pillarIcon,
+            id: pillar.id,
+            type: AddingObject.PILLAR
+        }).on('click', onObjectClick)
+            .addTo(objectLayer);
+    });
+    network.lines.forEach(function (line) {
+        if (line instanceof AirLine) {
+            Leaflet.polyline([
+                [line.point1Coordinates.x, line.point1Coordinates.y],
+                [line.point2Coordinates.x, line.point2Coordinates.y]
+            ], {
+                color: "green",
+                weight: '2',
+                dashArray: '5, 4',
+                id: line.id
+            }).on('click', onObjectClick).addTo(map);
+        }
     });
 }
 function onLocationFound(e) {
@@ -237,7 +293,7 @@ function toggleMode() {
         document.getElementById("switchModeButton").style.borderBottom = "none";
         setEditButtonsBorders("none");
         setEditButtonsDisplay("none");
-        addingBuilding = AddingBuilding.NONE;
+        addingObject = AddingObject.NONE;
     }
     else {
         document.getElementById("switchModeButton").style.borderBottom = "5px solid #8de3e3";
@@ -247,42 +303,62 @@ function toggleMode() {
 }
 function addTpn() {
     setEditButtonsBorders("none");
-    if (addingBuilding != AddingBuilding.TPN) {
-        addingBuilding = AddingBuilding.TPN;
+    if (addingObject != AddingObject.TPN) {
+        addingObject = AddingObject.TPN;
         document.getElementById("addTpnButton").style.borderBottom = "5px solid #8de3e3";
     }
     else {
-        addingBuilding = AddingBuilding.NONE;
+        addingObject = AddingObject.NONE;
     }
 }
 function addZtp() {
     setEditButtonsBorders("none");
-    if (addingBuilding != AddingBuilding.ZTP) {
-        addingBuilding = AddingBuilding.ZTP;
+    if (addingObject != AddingObject.ZTP) {
+        addingObject = AddingObject.ZTP;
         document.getElementById("addZtpButton").style.borderBottom = "5px solid #8de3e3";
     }
     else {
-        addingBuilding = AddingBuilding.NONE;
+        addingObject = AddingObject.NONE;
     }
 }
 function addPillar() {
     setEditButtonsBorders("none");
-    if (addingBuilding != AddingBuilding.PILLAR) {
-        addingBuilding = AddingBuilding.PILLAR;
+    if (addingObject != AddingObject.PILLAR) {
+        addingObject = AddingObject.PILLAR;
         document.getElementById("addPillarButton").style.borderBottom = "5px solid #8de3e3";
     }
     else {
-        addingBuilding = AddingBuilding.NONE;
+        addingObject = AddingObject.NONE;
+    }
+}
+function addAirLine() {
+    setEditButtonsBorders("none");
+    if (addingObject != AddingObject.AIR_LINE) {
+        addingObject = AddingObject.AIR_LINE;
+        document.getElementById("addAirLineButton").style.borderBottom = "5px solid #8de3e3";
+    }
+    else {
+        addingObject = AddingObject.NONE;
+    }
+}
+function addCableLine() {
+    setEditButtonsBorders("none");
+    if (addingObject != AddingObject.CABLE_LINE) {
+        addingObject = AddingObject.CABLE_LINE;
+        document.getElementById("addCableLineButton").style.borderBottom = "5px solid #8de3e3";
+    }
+    else {
+        addingObject = AddingObject.NONE;
     }
 }
 function deleteObject() {
     setEditButtonsBorders("none");
-    if (addingBuilding != AddingBuilding.DELETE) {
-        addingBuilding = AddingBuilding.DELETE;
+    if (addingObject != AddingObject.DELETE) {
+        addingObject = AddingObject.DELETE;
         document.getElementById("binButton").style.borderBottom = "5px solid #8de3e3";
     }
     else {
-        addingBuilding = AddingBuilding.NONE;
+        addingObject = AddingObject.NONE;
     }
 }
 function setEditButtonsBorders(borderStyle) {
@@ -302,26 +378,32 @@ function setEditButtonsDisplay(display) {
 function onMapClick(e) {
     if (editMode) {
         var buildingMarker;
-        switch (addingBuilding) {
-            case AddingBuilding.TPN:
+        switch (addingObject) {
+            case AddingObject.TPN:
                 buildingMarker = Leaflet.marker(e.latlng, {
-                    icon: tpnIcon
+                    icon: tpnIcon,
+                    id: ++network.maxId,
+                    type: AddingObject.TPN
                 }).on('click', onObjectClick);
-                network.tpns.push(new Tpn(new PointCoordinates(e.latlng.lat, e.latlng.lng)));
+                network.tpns.set(network.maxId, new Tpn(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng)));
                 break;
-            case AddingBuilding.ZTP:
+            case AddingObject.ZTP:
                 buildingMarker = Leaflet.marker(e.latlng, {
-                    icon: ztpIcon
+                    icon: ztpIcon,
+                    id: ++network.maxId,
+                    type: AddingObject.ZTP
                 }).on('click', onObjectClick);
-                network.ztps.push(new Ztp(new PointCoordinates(e.latlng.lat, e.latlng.lng)));
+                network.ztps.set(network.maxId, new Ztp(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng)));
                 break;
-            case AddingBuilding.PILLAR:
+            case AddingObject.PILLAR:
                 buildingMarker = Leaflet.marker(e.latlng, {
-                    icon: pillarIcon
+                    icon: pillarIcon,
+                    id: ++network.maxId,
+                    type: AddingObject.PILLAR
                 }).on('click', onObjectClick);
-                network.pillars.push(new Pillar(new PointCoordinates(e.latlng.lat, e.latlng.lng)));
+                network.pillars.set(network.maxId, new Pillar(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng)));
                 break;
-            case AddingBuilding.DELETE: break;
+            default: break;
         }
         if (buildingMarker) {
             buildingMarker.addTo(objectLayer);
@@ -329,8 +411,44 @@ function onMapClick(e) {
     }
 }
 function onObjectClick() {
-    if (addingBuilding == AddingBuilding.DELETE) {
-        map.removeLayer(this);
+    switch (addingObject) {
+        case AddingObject.DELETE:
+            map.removeLayer(this);
+            switch (this.options.type) {
+                case AddingObject.TPN:
+                    network.tpns.delete(this.options.id);
+                    break;
+                case AddingObject.ZTP:
+                    network.ztps.delete(this.options.id);
+                    break;
+                case AddingObject.PILLAR:
+                    network.pillars.delete(this.options.id);
+                    break;
+                case AddingObject.AIR_LINE:
+                    network.lines.delete(this.options.id);
+                    break;
+            }
+            break;
+        case AddingObject.AIR_LINE:
+            if (!linePoint1) { // point 1 is undefined
+                linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
+            }
+            else {
+                linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
+                Leaflet.polyline([
+                    [linePoint1.x, linePoint1.y],
+                    [linePoint2.x, linePoint2.y]
+                ], {
+                    color: "green",
+                    weight: '2',
+                    dashArray: '5, 4',
+                    id: ++network.maxId
+                }).on('click', onObjectClick).addTo(map);
+                network.lines.set(network.maxId, new AirLine(network.maxId, linePoint1, linePoint2));
+                linePoint1 = undefined;
+                linePoint2 = undefined;
+            }
+            break;
     }
 }
 //# sourceMappingURL=index.js.map
