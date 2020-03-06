@@ -87,11 +87,14 @@ enum AddingObject {
     RECLOSER,
     DELIMITER,
     PILLAR,
+    AIR_LINE,
+    CABLE_LINE,
     NONE,
     DELETE
 }
 var addingObject: AddingObject = AddingObject.NONE
-
+var linePoint1: PointCoordinates
+var linePoint2: PointCoordinates
 const map = Leaflet.map('map').setView([55.75, 37.62], 15);
 const objectLayer = Leaflet.layerGroup().addTo(map)
 const tpnIcon = Leaflet.icon(
