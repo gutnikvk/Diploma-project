@@ -100,27 +100,21 @@ var Rp = /** @class */ (function (_super) {
     return Rp;
 }(Building));
 var Line = /** @class */ (function () {
-    function Line(id, point1Coordinates, point2Coordinates) {
+    function Line(id, point1Coordinates, point2Coordinates, type) {
         this.id = id;
         this.point1Coordinates = point1Coordinates;
         this.point2Coordinates = point2Coordinates;
+        this.type = type;
     }
     return Line;
 }());
-var AirLine = /** @class */ (function (_super) {
-    __extends(AirLine, _super);
-    function AirLine(id, point1Coordinates, point2Coordinates) {
-        return _super.call(this, id, point1Coordinates, point2Coordinates) || this;
-    }
-    return AirLine;
-}(Line));
-var CableLine = /** @class */ (function (_super) {
-    __extends(CableLine, _super);
-    function CableLine(id, point1Coordinates, point2Coordinates) {
-        return _super.call(this, id, point1Coordinates, point2Coordinates) || this;
-    }
-    return CableLine;
-}(Line));
+(function (Line) {
+    var Type;
+    (function (Type) {
+        Type[Type["AIR"] = 0] = "AIR";
+        Type[Type["CABLE"] = 1] = "CABLE";
+    })(Type = Line.Type || (Line.Type = {}));
+})(Line || (Line = {}));
 var Leaflet = window['L'];
 var editMode = false;
 var AddingObject;
@@ -188,11 +182,21 @@ map.on('click', onMapClick);
 map.on('locationfound', onLocationFound);
 map.locate({ watch: true, setView: false });
 function saveFile(createNew) {
+    var json = JSON.stringify(network, function (key, value) {
+        if (value instanceof Map) {
+            return {
+                dataType: 'Map',
+                value: Array.from(value.entries())
+            };
+        }
+        else {
+            return value;
+        }
+    });
     if (createNew) {
         var fileName_1 = prompt("Введите имя файла для сохранения") + ".json";
         resolveLocalFileSystemURL(PATH, function (dir) {
             dir.getFile(fileName_1, { create: true }, function (fileEntry) {
-                var json = JSON.stringify(network);
                 fileEntry.createWriter(function (fileWriter) {
                     fileWriter.onerror = function (e) {
                         alert("Failed file write: " + e.toString());
@@ -209,7 +213,6 @@ function saveFile(createNew) {
             .then(function (file) {
             resolveLocalFileSystemURL(PATH, function (dir) {
                 dir.getFile(file.name, { create: true }, function (fileEntry) {
-                    var json = JSON.stringify(network);
                     fileEntry.createWriter(function (fileWriter) {
                         fileWriter.onerror = function (e) {
                             alert("Failed file write: " + e.toString());
@@ -243,9 +246,16 @@ function readNetworkFromFile() {
     });
 }
 function loadNetwork(networkData) {
-    network = JSON.parse(networkData);
+    network = JSON.parse(networkData, function (key, value) {
+        if (value.dataType === 'Map') {
+            return new Map(value.value);
+        }
+        else {
+            return value;
+        }
+    });
     objectLayer.clearLayers();
-    network.ztps.forEach(function (ztp) {
+    network.ztps.forEach(function (ztp, id) {
         Leaflet.marker([ztp.coordinates.x, ztp.coordinates.y], {
             icon: ztpIcon,
             id: ztp.id,
@@ -253,7 +263,7 @@ function loadNetwork(networkData) {
         }).on('click', onObjectClick)
             .addTo(objectLayer);
     });
-    network.tpns.forEach(function (tpn) {
+    network.tpns.forEach(function (tpn, id) {
         Leaflet.marker([tpn.coordinates.x, tpn.coordinates.y], {
             icon: tpnIcon,
             id: tpn.id,
@@ -261,7 +271,7 @@ function loadNetwork(networkData) {
         }).on('click', onObjectClick)
             .addTo(objectLayer);
     });
-    network.pillars.forEach(function (pillar) {
+    network.pillars.forEach(function (pillar, id) {
         Leaflet.marker([pillar.coordinates.x, pillar.coordinates.y], {
             icon: pillarIcon,
             id: pillar.id,
@@ -269,17 +279,31 @@ function loadNetwork(networkData) {
         }).on('click', onObjectClick)
             .addTo(objectLayer);
     });
-    network.lines.forEach(function (line) {
-        if (line instanceof AirLine) {
-            Leaflet.polyline([
-                [line.point1Coordinates.x, line.point1Coordinates.y],
-                [line.point2Coordinates.x, line.point2Coordinates.y]
-            ], {
-                color: "green",
-                weight: '2',
-                dashArray: '5, 4',
-                id: line.id
-            }).on('click', onObjectClick).addTo(map);
+    network.lines.forEach(function (line, id) {
+        switch (line.type) {
+            case Line.Type.AIR:
+                Leaflet.polyline([
+                    [line.point1Coordinates.x, line.point1Coordinates.y],
+                    [line.point2Coordinates.x, line.point2Coordinates.y]
+                ], {
+                    color: "green",
+                    weight: '2',
+                    dashArray: '5, 4',
+                    id: line.id,
+                    type: Line.Type.AIR
+                }).on('click', onObjectClick).addTo(map);
+                break;
+            case Line.Type.CABLE:
+                Leaflet.polyline([
+                    [line.point1Coordinates.x, line.point1Coordinates.y],
+                    [line.point2Coordinates.x, line.point2Coordinates.y]
+                ], {
+                    color: "green",
+                    weight: '2',
+                    id: line.id,
+                    type: Line.Type.CABLE
+                }).on('click', onObjectClick).addTo(map);
+                break;
         }
     });
 }
@@ -443,9 +467,29 @@ function onObjectClick() {
                     weight: '2',
                     dashArray: '5, 4',
                     id: ++network.maxId,
-                    type: AddingObject.AIR_LINE
+                    type: Line.Type.AIR
                 }).on('click', onObjectClick).addTo(map);
-                network.lines.set(network.maxId, new AirLine(network.maxId, linePoint1, linePoint2));
+                network.lines.set(network.maxId, new Line(network.maxId, linePoint1, linePoint2, Line.Type.AIR));
+                linePoint1 = undefined;
+                linePoint2 = undefined;
+            }
+            break;
+        case AddingObject.CABLE_LINE:
+            if (!linePoint1) { // point 1 is undefined
+                linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
+            }
+            else {
+                linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
+                Leaflet.polyline([
+                    [linePoint1.x, linePoint1.y],
+                    [linePoint2.x, linePoint2.y]
+                ], {
+                    color: "green",
+                    weight: '2',
+                    id: ++network.maxId,
+                    type: Line.Type.CABLE
+                }).on('click', onObjectClick).addTo(map);
+                network.lines.set(network.maxId, new Line(network.maxId, linePoint1, linePoint2, Line.Type.AIR));
                 linePoint1 = undefined;
                 linePoint2 = undefined;
             }

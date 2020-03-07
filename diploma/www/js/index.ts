@@ -89,22 +89,21 @@ class Line {
     id: number
     point1Coordinates: PointCoordinates
     point2Coordinates: PointCoordinates
-    constructor(id: number, point1Coordinates: PointCoordinates, point2Coordinates: PointCoordinates) {
+    type: Line.Type
+    constructor(id: number, point1Coordinates: PointCoordinates, point2Coordinates: PointCoordinates, type: Line.Type) {
         this.id = id
         this.point1Coordinates = point1Coordinates
         this.point2Coordinates = point2Coordinates
+        this.type = type
     }
 }
-class AirLine extends Line {
-    constructor(id: number, point1Coordinates: PointCoordinates, point2Coordinates: PointCoordinates) {
-        super(id, point1Coordinates, point2Coordinates)
+namespace Line {
+    export enum Type {
+        AIR,
+        CABLE
     }
 }
-class CableLine extends Line {
-    constructor(id: number, point1Coordinates: PointCoordinates, point2Coordinates: PointCoordinates) {
-        super(id, point1Coordinates, point2Coordinates)
-    }
-}
+
 const Leaflet = window['L']
 var editMode = false
 enum AddingObject {
@@ -191,11 +190,23 @@ map.on('locationfound', onLocationFound)
 map.locate({watch: true, setView: false})
 
 function saveFile(createNew: boolean) {
+    let json = JSON.stringify(
+        network,
+        (key, value) => {
+            if (value instanceof Map) {
+                return {
+                    dataType: 'Map', 
+                    value: Array.from(value.entries())
+                }
+            } else {
+                return value
+            }
+        }
+    )
     if (createNew) {
         let fileName = prompt("Введите имя файла для сохранения") + ".json"
         resolveLocalFileSystemURL(PATH, function(dir) {
             dir.getFile(fileName, {create:true}, function(fileEntry) {
-                let json = JSON.stringify(network)
                 fileEntry.createWriter(function (fileWriter) {
                     fileWriter.onerror = function (e) {
                         alert("Failed file write: " + e.toString())
@@ -213,7 +224,6 @@ function saveFile(createNew: boolean) {
                 file => {
                     resolveLocalFileSystemURL(PATH, function(dir) {
                         dir.getFile(file.name, {create:true}, function(fileEntry) {
-                            let json = JSON.stringify(network)
                             fileEntry.createWriter(function (fileWriter) {
                                 fileWriter.onerror = function (e) {
                                     alert("Failed file write: " + e.toString())
@@ -253,10 +263,19 @@ function readNetworkFromFile() {
 }
 
 function loadNetwork(networkData: string) {
-    network = JSON.parse(networkData)
+    network = JSON.parse(
+        networkData,
+        (key, value) => {
+            if (value.dataType === 'Map') {
+                return new Map(value.value)
+            } else {
+                return value
+            }
+        }
+    )
     objectLayer.clearLayers()
     network.ztps.forEach(
-        ztp => {
+        (ztp, id) => {
             Leaflet.marker(
                 [ztp.coordinates.x, ztp.coordinates.y],
                 {
@@ -269,7 +288,7 @@ function loadNetwork(networkData: string) {
         }
     )
     network.tpns.forEach(
-        tpn => {
+        (tpn, id) => {
             Leaflet.marker(
                 [tpn.coordinates.x, tpn.coordinates.y],
                 {
@@ -282,7 +301,7 @@ function loadNetwork(networkData: string) {
         }
     )
     network.pillars.forEach(
-        pillar => {
+        (pillar, id) => {
             Leaflet.marker(
                 [pillar.coordinates.x, pillar.coordinates.y],
                 {
@@ -295,20 +314,37 @@ function loadNetwork(networkData: string) {
         }
     )
     network.lines.forEach(
-        line => {
-            if (line instanceof AirLine) {
-                Leaflet.polyline(
-                    [
-                        [line.point1Coordinates.x, line.point1Coordinates.y],
-                        [line.point2Coordinates.x, line.point2Coordinates.y]
-                    ],
-                    {
-                        color: "green",
-                        weight: '2',
-                        dashArray: '5, 4',
-                        id: line.id
-                    }
-                ).on('click', onObjectClick).addTo(map)
+        (line, id) => {
+            switch (line.type) {
+                case Line.Type.AIR:
+                    Leaflet.polyline(
+                        [
+                            [line.point1Coordinates.x, line.point1Coordinates.y],
+                            [line.point2Coordinates.x, line.point2Coordinates.y]
+                        ],
+                        {
+                            color: "green",
+                            weight: '2',
+                            dashArray: '5, 4',
+                            id: line.id,
+                            type: Line.Type.AIR
+                        }
+                    ).on('click', onObjectClick).addTo(map)
+                    break
+                case Line.Type.CABLE:
+                    Leaflet.polyline(
+                        [
+                            [line.point1Coordinates.x, line.point1Coordinates.y],
+                            [line.point2Coordinates.x, line.point2Coordinates.y]
+                        ],
+                        {
+                            color: "green",
+                            weight: '2',
+                            id: line.id,
+                            type: Line.Type.CABLE
+                        }
+                    ).on('click', onObjectClick).addTo(map)
+                    break
             }
         }
     )
@@ -506,15 +542,46 @@ function onObjectClick() {
                         weight: '2',
                         dashArray: '5, 4',
                         id: ++network.maxId,
-                        type: AddingObject.AIR_LINE
+                        type: Line.Type.AIR
                     }
                 ).on('click', onObjectClick).addTo(map)
                 network.lines.set(
                     network.maxId, 
-                    new AirLine(
+                    new Line(
                         network.maxId,
                         linePoint1,
-                        linePoint2
+                        linePoint2,
+                        Line.Type.AIR
+                    )
+                )
+                linePoint1 = undefined
+                linePoint2 = undefined
+            }
+            break
+        case AddingObject.CABLE_LINE:
+            if (!linePoint1) { // point 1 is undefined
+                linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
+            } else {
+                linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
+                Leaflet.polyline(
+                    [
+                        [linePoint1.x, linePoint1.y],
+                        [linePoint2.x, linePoint2.y]
+                    ],
+                    {
+                        color: "green",
+                        weight: '2',
+                        id: ++network.maxId,
+                        type: Line.Type.CABLE
+                    }
+                ).on('click', onObjectClick).addTo(map)
+                network.lines.set(
+                    network.maxId, 
+                    new Line(
+                        network.maxId,
+                        linePoint1,
+                        linePoint2,
+                        Line.Type.AIR
                     )
                 )
                 linePoint1 = undefined
