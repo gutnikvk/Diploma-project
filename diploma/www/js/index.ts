@@ -8,36 +8,15 @@ class PointCoordinates {
     }
 }
 class Network {
-    id: string
-    subStations: Map<number, SubStation>
-    rps: Map<number, Rp>
-    reclosers: Map<number, Recloser>
-    delimiters: Map<number, Delimiter>
-    ztps: Map<number, Ztp>
-    tpns: Map<number, Tpn>
-    pillars: Map<number, Pillar>
+    buildings: Map<number, Building>
     lines: Map<number, Line>
     maxId: number
     constructor(
-        id: string, 
-        subStations: Map<number, SubStation> = new Map(),
-        rps: Map<number, Rp> = new Map(),
-        reclosers: Map<number, Recloser> = new Map(),
-        delimiters: Map<number, Delimiter> = new Map(),
-        ztps: Map<number, Ztp> = new Map(),
-        tpns: Map<number, Tpn> = new Map(),
-        pillars: Map<number, Pillar> = new Map(),
+        buildings: Map<number, Building> = new Map(),
         lines: Map<number, Line> = new Map(),
         maxId: number = 0
     ) {
-        this.id = id
-        this.subStations = subStations
-        this.rps = rps
-        this.reclosers = reclosers
-        this.delimiters = delimiters
-        this.ztps = ztps
-        this.tpns = tpns
-        this.pillars = pillars
+        this.buildings = buildings
         this.lines = lines
         this.maxId = maxId
     }
@@ -45,44 +24,22 @@ class Network {
 class Building {
     id: number
     coordinates: PointCoordinates
-    constructor(id: number, coordinates: PointCoordinates) {
+    type: Building.Type
+    constructor(id: number, coordinates: PointCoordinates, type: Building.Type) {
         this.id = id
         this.coordinates = coordinates
+        this.type = type
     }
 }
-class SubStation extends Building {
-    constructor(id: number, coordinates: PointCoordinates) {
-        super(id, coordinates)
-    }
-}
-class Ztp extends Building {
-    constructor(id: number, coordinates: PointCoordinates) {
-        super(id, coordinates)
-    }
-}
-class Pillar extends Building {
-    constructor(id: number, coordinates: PointCoordinates) {
-        super(id, coordinates)
-    }
-}
-class Recloser extends Building {
-    constructor(id: number, coordinates: PointCoordinates) {
-        super(id, coordinates)
-    }
-}
-class Delimiter extends Building {
-    constructor(id: number, coordinates: PointCoordinates) {
-        super(id, coordinates)
-    }
-}
-class Tpn extends Building {
-    constructor(id: number, coordinates: PointCoordinates) {
-        super(id, coordinates)
-    }
-}
-class Rp extends Building {
-    constructor(id: number, coordinates: PointCoordinates) {
-        super(id, coordinates)
+namespace Building {
+    export enum Type {
+        SUB_STATION,
+        ZTP,
+        RP,
+        PILLAR,
+        RECLOSER,
+        DELIMITER,
+        TPN
     }
 }
 class Line {
@@ -103,9 +60,6 @@ namespace Line {
         CABLE
     }
 }
-
-const Leaflet = window['L']
-var editMode = false
 enum AddingObject {
     ZTP,
     RP,
@@ -119,32 +73,35 @@ enum AddingObject {
     NONE,
     DELETE
 }
+// end defs
+
+const Leaflet = window['L']
+var editMode = false
+
 var addingObject: AddingObject = AddingObject.NONE
 var linePoint1: PointCoordinates
 var linePoint2: PointCoordinates
 const map = Leaflet.map('map').setView([55.75, 37.62], 15);
 const objectLayer = Leaflet.layerGroup().addTo(map)
-const tpnIcon = Leaflet.icon(
+const TPN_ICON = Leaflet.icon(
     {
         iconUrl: './img/tpnIcon.svg',
         iconAnchor: [10, 10]
     }
 )
-const ztpIcon = Leaflet.icon(
+const ZTP_ICON = Leaflet.icon(
     {
         iconUrl: './img/ztpIcon.svg',
         iconAnchor: [10, 10]
     }
 )
-const pillarIcon = Leaflet.icon(
+const PILLAR_ICON = Leaflet.icon(
     {
         iconUrl: './img/pillarIcon.svg',
         iconAnchor: [4, 4]
     }
 )
-var network = new Network(
-    "network1"
-)
+var network = new Network()
 
 // init map layers
 Leaflet.tileLayer(
@@ -274,43 +231,42 @@ function loadNetwork(networkData: string) {
         }
     )
     objectLayer.clearLayers()
-    network.ztps.forEach(
-        (ztp, id) => {
-            Leaflet.marker(
-                [ztp.coordinates.x, ztp.coordinates.y],
-                {
-                    icon: ztpIcon,
-                    id: ztp.id,
-                    type: AddingObject.ZTP
-                }
-            ).on('click', onObjectClick)
-            .addTo(objectLayer)
-        }
-    )
-    network.tpns.forEach(
-        (tpn, id) => {
-            Leaflet.marker(
-                [tpn.coordinates.x, tpn.coordinates.y],
-                {
-                    icon: tpnIcon,
-                    id: tpn.id,
-                    type: AddingObject.TPN
-                }
-            ).on('click', onObjectClick)
-            .addTo(objectLayer)
-        }
-    )
-    network.pillars.forEach(
-        (pillar, id) => {
-            Leaflet.marker(
-                [pillar.coordinates.x, pillar.coordinates.y],
-                {
-                    icon: pillarIcon,
-                    id: pillar.id,
-                    type: AddingObject.PILLAR
-                }
-            ).on('click', onObjectClick)
-            .addTo(objectLayer)
+    network.buildings.forEach(
+        (building, id) => {
+            switch (building.type) {
+                case Building.Type.TPN:
+                    Leaflet.marker(
+                        [building.coordinates.x, building.coordinates.y],
+                        {
+                            icon: TPN_ICON,
+                            id: building.id,
+                            type: Building.Type.TPN
+                        }
+                    ).on('click', onObjectClick)
+                    .addTo(objectLayer)
+                    break
+                case Building.Type.ZTP:
+                    Leaflet.marker(
+                        [building.coordinates.x, building.coordinates.y],
+                        {
+                            icon: ZTP_ICON,
+                            id: building.id,
+                            type: AddingObject.ZTP
+                        }
+                    ).on('click', onObjectClick)
+                    .addTo(objectLayer)
+                    break
+                case Building.Type.PILLAR:
+                    Leaflet.marker(
+                        [building.coordinates.x, building.coordinates.y],
+                        {
+                            icon: PILLAR_ICON,
+                            id: building.id,
+                            type: AddingObject.PILLAR
+                        }
+                    ).on('click', onObjectClick)
+                    .addTo(objectLayer)
+            }
         }
     )
     network.lines.forEach(
@@ -329,7 +285,7 @@ function loadNetwork(networkData: string) {
                             id: line.id,
                             type: Line.Type.AIR
                         }
-                    ).on('click', onObjectClick).addTo(map)
+                    ).on('click', onObjectClick).addTo(objectLayer)
                     break
                 case Line.Type.CABLE:
                     Leaflet.polyline(
@@ -343,7 +299,7 @@ function loadNetwork(networkData: string) {
                             id: line.id,
                             type: Line.Type.CABLE
                         }
-                    ).on('click', onObjectClick).addTo(map)
+                    ).on('click', onObjectClick).addTo(objectLayer)
                     break
             }
         }
@@ -453,16 +409,17 @@ function onMapClick(e) {
                 buildingMarker = Leaflet.marker(
                     e.latlng, 
                     {
-                        icon: tpnIcon,
+                        icon: TPN_ICON,
                         id: ++network.maxId,
-                        type: AddingObject.TPN
+                        type: Building.Type.TPN
                     }
                 ).on('click', onObjectClick)
-                network.tpns.set(
+                network.buildings.set(
                     network.maxId, 
-                    new Tpn(
+                    new Building(
                         network.maxId,
-                        new PointCoordinates(e.latlng.lat, e.latlng.lng)
+                        new PointCoordinates(e.latlng.lat, e.latlng.lng),
+                        Building.Type.TPN
                     )
                 )
                 break
@@ -470,16 +427,17 @@ function onMapClick(e) {
                 buildingMarker = Leaflet.marker(
                     e.latlng,
                     {
-                        icon: ztpIcon,
+                        icon: ZTP_ICON,
                         id: ++network.maxId,
-                        type: AddingObject.ZTP
+                        type: Building.Type.ZTP
                     }
                 ).on('click', onObjectClick)
-                network.ztps.set(
+                network.buildings.set(
                     network.maxId, 
-                    new Ztp(
+                    new Building(
                         network.maxId,
-                        new PointCoordinates(e.latlng.lat, e.latlng.lng)
+                        new PointCoordinates(e.latlng.lat, e.latlng.lng),
+                        Building.Type.ZTP
                     )
                 )
                 break
@@ -487,16 +445,17 @@ function onMapClick(e) {
                 buildingMarker = Leaflet.marker(
                     e.latlng, 
                     {
-                        icon: pillarIcon,
+                        icon: PILLAR_ICON,
                         id: ++network.maxId,
-                        type: AddingObject.PILLAR
+                        type: Building.Type.PILLAR
                     }
                 ).on('click', onObjectClick)
-                network.pillars.set(
+                network.buildings.set(
                     network.maxId, 
-                    new Pillar(
+                    new Building(
                         network.maxId,
-                        new PointCoordinates(e.latlng.lat, e.latlng.lng)
+                        new PointCoordinates(e.latlng.lat, e.latlng.lng),
+                        Building.Type.PILLAR
                     )
                 )
                 break
@@ -513,16 +472,13 @@ function onObjectClick() {
         case AddingObject.DELETE:
             map.removeLayer(this)
             switch (this.options.type) {
-                case AddingObject.TPN:
-                    network.tpns.delete(this.options.id)
+                case Building.Type.TPN:
+                case Building.Type.ZTP:
+                case Building.Type.PILLAR:
+                    network.buildings.delete(this.options.id)
                     break
-                case AddingObject.ZTP:
-                    network.ztps.delete(this.options.id)
-                    break
-                case AddingObject.PILLAR:
-                    network.pillars.delete(this.options.id)
-                    break
-                case AddingObject.AIR_LINE:
+                case Line.Type.AIR:
+                case Line.Type.CABLE:
                     network.lines.delete(this.options.id)
                     break
             }

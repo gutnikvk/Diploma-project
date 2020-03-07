@@ -1,16 +1,3 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 // defs
 var PointCoordinates = /** @class */ (function () {
     function PointCoordinates(x, y) {
@@ -20,85 +7,36 @@ var PointCoordinates = /** @class */ (function () {
     return PointCoordinates;
 }());
 var Network = /** @class */ (function () {
-    function Network(id, subStations, rps, reclosers, delimiters, ztps, tpns, pillars, lines, maxId) {
-        if (subStations === void 0) { subStations = new Map(); }
-        if (rps === void 0) { rps = new Map(); }
-        if (reclosers === void 0) { reclosers = new Map(); }
-        if (delimiters === void 0) { delimiters = new Map(); }
-        if (ztps === void 0) { ztps = new Map(); }
-        if (tpns === void 0) { tpns = new Map(); }
-        if (pillars === void 0) { pillars = new Map(); }
+    function Network(buildings, lines, maxId) {
+        if (buildings === void 0) { buildings = new Map(); }
         if (lines === void 0) { lines = new Map(); }
         if (maxId === void 0) { maxId = 0; }
-        this.id = id;
-        this.subStations = subStations;
-        this.rps = rps;
-        this.reclosers = reclosers;
-        this.delimiters = delimiters;
-        this.ztps = ztps;
-        this.tpns = tpns;
-        this.pillars = pillars;
+        this.buildings = buildings;
         this.lines = lines;
         this.maxId = maxId;
     }
     return Network;
 }());
 var Building = /** @class */ (function () {
-    function Building(id, coordinates) {
+    function Building(id, coordinates, type) {
         this.id = id;
         this.coordinates = coordinates;
+        this.type = type;
     }
     return Building;
 }());
-var SubStation = /** @class */ (function (_super) {
-    __extends(SubStation, _super);
-    function SubStation(id, coordinates) {
-        return _super.call(this, id, coordinates) || this;
-    }
-    return SubStation;
-}(Building));
-var Ztp = /** @class */ (function (_super) {
-    __extends(Ztp, _super);
-    function Ztp(id, coordinates) {
-        return _super.call(this, id, coordinates) || this;
-    }
-    return Ztp;
-}(Building));
-var Pillar = /** @class */ (function (_super) {
-    __extends(Pillar, _super);
-    function Pillar(id, coordinates) {
-        return _super.call(this, id, coordinates) || this;
-    }
-    return Pillar;
-}(Building));
-var Recloser = /** @class */ (function (_super) {
-    __extends(Recloser, _super);
-    function Recloser(id, coordinates) {
-        return _super.call(this, id, coordinates) || this;
-    }
-    return Recloser;
-}(Building));
-var Delimiter = /** @class */ (function (_super) {
-    __extends(Delimiter, _super);
-    function Delimiter(id, coordinates) {
-        return _super.call(this, id, coordinates) || this;
-    }
-    return Delimiter;
-}(Building));
-var Tpn = /** @class */ (function (_super) {
-    __extends(Tpn, _super);
-    function Tpn(id, coordinates) {
-        return _super.call(this, id, coordinates) || this;
-    }
-    return Tpn;
-}(Building));
-var Rp = /** @class */ (function (_super) {
-    __extends(Rp, _super);
-    function Rp(id, coordinates) {
-        return _super.call(this, id, coordinates) || this;
-    }
-    return Rp;
-}(Building));
+(function (Building) {
+    var Type;
+    (function (Type) {
+        Type[Type["SUB_STATION"] = 0] = "SUB_STATION";
+        Type[Type["ZTP"] = 1] = "ZTP";
+        Type[Type["RP"] = 2] = "RP";
+        Type[Type["PILLAR"] = 3] = "PILLAR";
+        Type[Type["RECLOSER"] = 4] = "RECLOSER";
+        Type[Type["DELIMITER"] = 5] = "DELIMITER";
+        Type[Type["TPN"] = 6] = "TPN";
+    })(Type = Building.Type || (Building.Type = {}));
+})(Building || (Building = {}));
 var Line = /** @class */ (function () {
     function Line(id, point1Coordinates, point2Coordinates, type) {
         this.id = id;
@@ -115,8 +53,6 @@ var Line = /** @class */ (function () {
         Type[Type["CABLE"] = 1] = "CABLE";
     })(Type = Line.Type || (Line.Type = {}));
 })(Line || (Line = {}));
-var Leaflet = window['L'];
-var editMode = false;
 var AddingObject;
 (function (AddingObject) {
     AddingObject[AddingObject["ZTP"] = 0] = "ZTP";
@@ -131,24 +67,27 @@ var AddingObject;
     AddingObject[AddingObject["NONE"] = 9] = "NONE";
     AddingObject[AddingObject["DELETE"] = 10] = "DELETE";
 })(AddingObject || (AddingObject = {}));
+// end defs
+var Leaflet = window['L'];
+var editMode = false;
 var addingObject = AddingObject.NONE;
 var linePoint1;
 var linePoint2;
 var map = Leaflet.map('map').setView([55.75, 37.62], 15);
 var objectLayer = Leaflet.layerGroup().addTo(map);
-var tpnIcon = Leaflet.icon({
+var TPN_ICON = Leaflet.icon({
     iconUrl: './img/tpnIcon.svg',
     iconAnchor: [10, 10]
 });
-var ztpIcon = Leaflet.icon({
+var ZTP_ICON = Leaflet.icon({
     iconUrl: './img/ztpIcon.svg',
     iconAnchor: [10, 10]
 });
-var pillarIcon = Leaflet.icon({
+var PILLAR_ICON = Leaflet.icon({
     iconUrl: './img/pillarIcon.svg',
     iconAnchor: [4, 4]
 });
-var network = new Network("network1");
+var network = new Network();
 // init map layers
 Leaflet.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     maxZoom: 18,
@@ -255,29 +194,32 @@ function loadNetwork(networkData) {
         }
     });
     objectLayer.clearLayers();
-    network.ztps.forEach(function (ztp, id) {
-        Leaflet.marker([ztp.coordinates.x, ztp.coordinates.y], {
-            icon: ztpIcon,
-            id: ztp.id,
-            type: AddingObject.ZTP
-        }).on('click', onObjectClick)
-            .addTo(objectLayer);
-    });
-    network.tpns.forEach(function (tpn, id) {
-        Leaflet.marker([tpn.coordinates.x, tpn.coordinates.y], {
-            icon: tpnIcon,
-            id: tpn.id,
-            type: AddingObject.TPN
-        }).on('click', onObjectClick)
-            .addTo(objectLayer);
-    });
-    network.pillars.forEach(function (pillar, id) {
-        Leaflet.marker([pillar.coordinates.x, pillar.coordinates.y], {
-            icon: pillarIcon,
-            id: pillar.id,
-            type: AddingObject.PILLAR
-        }).on('click', onObjectClick)
-            .addTo(objectLayer);
+    network.buildings.forEach(function (building, id) {
+        switch (building.type) {
+            case Building.Type.TPN:
+                Leaflet.marker([building.coordinates.x, building.coordinates.y], {
+                    icon: TPN_ICON,
+                    id: building.id,
+                    type: Building.Type.TPN
+                }).on('click', onObjectClick)
+                    .addTo(objectLayer);
+                break;
+            case Building.Type.ZTP:
+                Leaflet.marker([building.coordinates.x, building.coordinates.y], {
+                    icon: ZTP_ICON,
+                    id: building.id,
+                    type: AddingObject.ZTP
+                }).on('click', onObjectClick)
+                    .addTo(objectLayer);
+                break;
+            case Building.Type.PILLAR:
+                Leaflet.marker([building.coordinates.x, building.coordinates.y], {
+                    icon: PILLAR_ICON,
+                    id: building.id,
+                    type: AddingObject.PILLAR
+                }).on('click', onObjectClick)
+                    .addTo(objectLayer);
+        }
     });
     network.lines.forEach(function (line, id) {
         switch (line.type) {
@@ -291,7 +233,7 @@ function loadNetwork(networkData) {
                     dashArray: '5, 4',
                     id: line.id,
                     type: Line.Type.AIR
-                }).on('click', onObjectClick).addTo(map);
+                }).on('click', onObjectClick).addTo(objectLayer);
                 break;
             case Line.Type.CABLE:
                 Leaflet.polyline([
@@ -302,7 +244,7 @@ function loadNetwork(networkData) {
                     weight: '2',
                     id: line.id,
                     type: Line.Type.CABLE
-                }).on('click', onObjectClick).addTo(map);
+                }).on('click', onObjectClick).addTo(objectLayer);
                 break;
         }
     });
@@ -405,27 +347,27 @@ function onMapClick(e) {
         switch (addingObject) {
             case AddingObject.TPN:
                 buildingMarker = Leaflet.marker(e.latlng, {
-                    icon: tpnIcon,
+                    icon: TPN_ICON,
                     id: ++network.maxId,
-                    type: AddingObject.TPN
+                    type: Building.Type.TPN
                 }).on('click', onObjectClick);
-                network.tpns.set(network.maxId, new Tpn(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng)));
+                network.buildings.set(network.maxId, new Building(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng), Building.Type.TPN));
                 break;
             case AddingObject.ZTP:
                 buildingMarker = Leaflet.marker(e.latlng, {
-                    icon: ztpIcon,
+                    icon: ZTP_ICON,
                     id: ++network.maxId,
-                    type: AddingObject.ZTP
+                    type: Building.Type.ZTP
                 }).on('click', onObjectClick);
-                network.ztps.set(network.maxId, new Ztp(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng)));
+                network.buildings.set(network.maxId, new Building(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng), Building.Type.ZTP));
                 break;
             case AddingObject.PILLAR:
                 buildingMarker = Leaflet.marker(e.latlng, {
-                    icon: pillarIcon,
+                    icon: PILLAR_ICON,
                     id: ++network.maxId,
-                    type: AddingObject.PILLAR
+                    type: Building.Type.PILLAR
                 }).on('click', onObjectClick);
-                network.pillars.set(network.maxId, new Pillar(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng)));
+                network.buildings.set(network.maxId, new Building(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng), Building.Type.PILLAR));
                 break;
             default: break;
         }
@@ -439,16 +381,13 @@ function onObjectClick() {
         case AddingObject.DELETE:
             map.removeLayer(this);
             switch (this.options.type) {
-                case AddingObject.TPN:
-                    network.tpns.delete(this.options.id);
+                case Building.Type.TPN:
+                case Building.Type.ZTP:
+                case Building.Type.PILLAR:
+                    network.buildings.delete(this.options.id);
                     break;
-                case AddingObject.ZTP:
-                    network.ztps.delete(this.options.id);
-                    break;
-                case AddingObject.PILLAR:
-                    network.pillars.delete(this.options.id);
-                    break;
-                case AddingObject.AIR_LINE:
+                case Line.Type.AIR:
+                case Line.Type.CABLE:
                     network.lines.delete(this.options.id);
                     break;
             }
