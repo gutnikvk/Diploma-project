@@ -75,6 +75,22 @@ var linePoint1;
 var linePoint2;
 var map = Leaflet.map('map').setView([55.75, 37.62], 15);
 var objectLayer = Leaflet.layerGroup().addTo(map);
+var SUB_STATION_ICON = Leaflet.icon({
+    iconUrl: './img/subStationIcon.svg',
+    iconAnchor: [15, 15]
+});
+var RP_ICON = Leaflet.icon({
+    iconUrl: './img/rpIcon.svg',
+    iconAnchor: [15, 15]
+});
+var RECLOSER_ICON = Leaflet.icon({
+    iconUrl: './img/recloserIcon.svg',
+    iconAnchor: [10, 10]
+});
+var DELIMITER_ICON = Leaflet.icon({
+    iconUrl: './img/delimiterIcon.svg',
+    iconAnchor: [10, 10]
+});
 var TPN_ICON = Leaflet.icon({
     iconUrl: './img/tpnIcon.svg',
     iconAnchor: [10, 10]
@@ -196,6 +212,38 @@ function loadNetwork(networkData) {
     objectLayer.clearLayers();
     network.buildings.forEach(function (building, id) {
         switch (building.type) {
+            case Building.Type.RP:
+                Leaflet.marker([building.coordinates.x, building.coordinates.y], {
+                    icon: RP_ICON,
+                    id: building.id,
+                    type: Building.Type.RP
+                }).on('click', onObjectClick)
+                    .addTo(objectLayer);
+                break;
+            case Building.Type.SUB_STATION:
+                Leaflet.marker([building.coordinates.x, building.coordinates.y], {
+                    icon: SUB_STATION_ICON,
+                    id: building.id,
+                    type: Building.Type.SUB_STATION
+                }).on('click', onObjectClick)
+                    .addTo(objectLayer);
+                break;
+            case Building.Type.RECLOSER:
+                Leaflet.marker([building.coordinates.x, building.coordinates.y], {
+                    icon: RECLOSER_ICON,
+                    id: building.id,
+                    type: Building.Type.RECLOSER
+                }).on('click', onObjectClick)
+                    .addTo(objectLayer);
+                break;
+            case Building.Type.DELIMITER:
+                Leaflet.marker([building.coordinates.x, building.coordinates.y], {
+                    icon: DELIMITER_ICON,
+                    id: building.id,
+                    type: Building.Type.DELIMITER
+                }).on('click', onObjectClick)
+                    .addTo(objectLayer);
+                break;
             case Building.Type.TPN:
                 Leaflet.marker([building.coordinates.x, building.coordinates.y], {
                     icon: TPN_ICON,
@@ -266,6 +314,46 @@ function toggleMode() {
         setEditButtonsDisplay("inline-block");
     }
     editMode = !editMode;
+}
+function addSubStation() {
+    setEditButtonsBorders("none");
+    if (addingObject != AddingObject.SUB_STATION) {
+        addingObject = AddingObject.SUB_STATION;
+        document.getElementById("addSubStationButton").style.borderBottom = "5px solid #8de3e3";
+    }
+    else {
+        addingObject = AddingObject.NONE;
+    }
+}
+function addRp() {
+    setEditButtonsBorders("none");
+    if (addingObject != AddingObject.RP) {
+        addingObject = AddingObject.RP;
+        document.getElementById("addRpButton").style.borderBottom = "5px solid #8de3e3";
+    }
+    else {
+        addingObject = AddingObject.NONE;
+    }
+}
+function addRecloser() {
+    setEditButtonsBorders("none");
+    if (addingObject != AddingObject.RECLOSER) {
+        addingObject = AddingObject.RECLOSER;
+        document.getElementById("addRecloserButton").style.borderBottom = "5px solid #8de3e3";
+    }
+    else {
+        addingObject = AddingObject.NONE;
+    }
+}
+function addDelimiter() {
+    setEditButtonsBorders("none");
+    if (addingObject != AddingObject.DELIMITER) {
+        addingObject = AddingObject.DELIMITER;
+        document.getElementById("addDelimiterButton").style.borderBottom = "5px solid #8de3e3";
+    }
+    else {
+        addingObject = AddingObject.NONE;
+    }
 }
 function addTpn() {
     setEditButtonsBorders("none");
@@ -345,6 +433,38 @@ function onMapClick(e) {
     if (editMode) {
         var buildingMarker;
         switch (addingObject) {
+            case AddingObject.SUB_STATION:
+                buildingMarker = Leaflet.marker(e.latlng, {
+                    icon: SUB_STATION_ICON,
+                    id: ++network.maxId,
+                    type: Building.Type.SUB_STATION
+                }).on('click', onObjectClick);
+                network.buildings.set(network.maxId, new Building(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng), Building.Type.SUB_STATION));
+                break;
+            case AddingObject.RP:
+                buildingMarker = Leaflet.marker(e.latlng, {
+                    icon: RP_ICON,
+                    id: ++network.maxId,
+                    type: Building.Type.RP
+                }).on('click', onObjectClick);
+                network.buildings.set(network.maxId, new Building(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng), Building.Type.RP));
+                break;
+            case AddingObject.RECLOSER:
+                buildingMarker = Leaflet.marker(e.latlng, {
+                    icon: RECLOSER_ICON,
+                    id: ++network.maxId,
+                    type: Building.Type.RECLOSER
+                }).on('click', onObjectClick);
+                network.buildings.set(network.maxId, new Building(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng), Building.Type.RECLOSER));
+                break;
+            case AddingObject.DELIMITER:
+                buildingMarker = Leaflet.marker(e.latlng, {
+                    icon: DELIMITER_ICON,
+                    id: ++network.maxId,
+                    type: Building.Type.DELIMITER
+                }).on('click', onObjectClick);
+                network.buildings.set(network.maxId, new Building(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng), Building.Type.DELIMITER));
+                break;
             case AddingObject.TPN:
                 buildingMarker = Leaflet.marker(e.latlng, {
                     icon: TPN_ICON,
@@ -384,6 +504,10 @@ function onObjectClick() {
                 case Building.Type.TPN:
                 case Building.Type.ZTP:
                 case Building.Type.PILLAR:
+                case Building.Type.SUB_STATION:
+                case Building.Type.RP:
+                case Building.Type.DELIMITER:
+                case Building.Type.RECLOSER:
                     network.buildings.delete(this.options.id);
                     break;
                 case Line.Type.AIR:

@@ -40,6 +40,22 @@
     background-position: center;
 }
 
+#addSubStationButton {
+    background-image: url(../img/subStationButtonIcon.svg);
+}
+
+#addRpButton {
+    background-image: url(../img/rpButtonIcon.svg);
+}
+
+#addRecloserButton {
+    background-image: url(../img/recloserButtonIcon.svg);
+}
+
+#addDelimiterButton {
+    background-image: url(../img/delimiterButtonIcon.svg);
+}
+
 #addTpnButton {
     background-image: url(../img/tpnButtonIcon.svg);
 }
