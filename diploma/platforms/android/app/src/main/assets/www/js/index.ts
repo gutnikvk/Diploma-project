@@ -25,10 +25,12 @@ class Building {
     id: number
     coordinates: PointCoordinates
     type: Building.Type
-    constructor(id: number, coordinates: PointCoordinates, type: Building.Type) {
+    dispatcherName: string
+    constructor(id: number, coordinates: PointCoordinates, type: Building.Type, dispatcherName: string = "") {
         this.id = id
         this.coordinates = coordinates
         this.type = type
+        this.dispatcherName = dispatcherName
     }
 }
 namespace Building {
@@ -257,91 +259,88 @@ function loadNetwork(networkData: string) {
     objectLayer.clearLayers()
     network.buildings.forEach(
         (building, id) => {
+            var marker
             switch (building.type) {
                 case Building.Type.RP:
-                    Leaflet.marker(
+                    marker = Leaflet.marker(
                         [building.coordinates.x, building.coordinates.y],
                         {
                             icon: RP_ICON,
                             id: building.id,
                             type: Building.Type.RP
                         }
-                    ).on('click', onObjectClick)
-                    .addTo(objectLayer)
+                    )
                     break
                 case Building.Type.SUB_STATION:
-                    Leaflet.marker(
+                    marker = Leaflet.marker(
                         [building.coordinates.x, building.coordinates.y],
                         {
                             icon: SUB_STATION_ICON,
                             id: building.id,
                             type: Building.Type.SUB_STATION
                         }
-                    ).on('click', onObjectClick)
-                    .addTo(objectLayer)
+                    )
                     break
                 case Building.Type.RECLOSER:
-                    Leaflet.marker(
+                    marker = Leaflet.marker(
                         [building.coordinates.x, building.coordinates.y],
                         {
                             icon: RECLOSER_ICON,
                             id: building.id,
                             type: Building.Type.RECLOSER
                         }
-                    ).on('click', onObjectClick)
-                    .addTo(objectLayer)
+                    )
                     break
                 case Building.Type.DELIMITER:
-                    Leaflet.marker(
+                    marker = Leaflet.marker(
                         [building.coordinates.x, building.coordinates.y],
                         {
                             icon: DELIMITER_ICON,
                             id: building.id,
                             type: Building.Type.DELIMITER
                         }
-                    ).on('click', onObjectClick)
-                    .addTo(objectLayer)
+                    )
                     break
                 case Building.Type.TPN:
-                    Leaflet.marker(
+                    marker = Leaflet.marker(
                         [building.coordinates.x, building.coordinates.y],
                         {
                             icon: TPN_ICON,
                             id: building.id,
                             type: Building.Type.TPN
                         }
-                    ).on('click', onObjectClick)
-                    .addTo(objectLayer)
+                    )
                     break
                 case Building.Type.ZTP:
-                    Leaflet.marker(
+                    marker = Leaflet.marker(
                         [building.coordinates.x, building.coordinates.y],
                         {
                             icon: ZTP_ICON,
                             id: building.id,
                             type: AddingObject.ZTP
                         }
-                    ).on('click', onObjectClick)
-                    .addTo(objectLayer)
+                    )
                     break
                 case Building.Type.PILLAR:
-                    Leaflet.marker(
+                    marker = Leaflet.marker(
                         [building.coordinates.x, building.coordinates.y],
                         {
                             icon: PILLAR_ICON,
                             id: building.id,
                             type: AddingObject.PILLAR
                         }
-                    ).on('click', onObjectClick)
-                    .addTo(objectLayer)
+                    )
+                    break
             }
+            marker.on('click', onObjectClick).addTo(objectLayer)
         }
     )
     network.lines.forEach(
         (line, id) => {
-            switch (line.type) {
+            var polyline
+            switch (polyline.type) {
                 case Line.Type.AIR:
-                    Leaflet.polyline(
+                    polyline = Leaflet.polyline(
                         [
                             [line.point1Coordinates.x, line.point1Coordinates.y],
                             [line.point2Coordinates.x, line.point2Coordinates.y]
@@ -353,10 +352,10 @@ function loadNetwork(networkData: string) {
                             id: line.id,
                             type: Line.Type.AIR
                         }
-                    ).on('click', onObjectClick).addTo(objectLayer)
+                    )
                     break
                 case Line.Type.CABLE:
-                    Leaflet.polyline(
+                    polyline = Leaflet.polyline(
                         [
                             [line.point1Coordinates.x, line.point1Coordinates.y],
                             [line.point2Coordinates.x, line.point2Coordinates.y]
@@ -367,9 +366,10 @@ function loadNetwork(networkData: string) {
                             id: line.id,
                             type: Line.Type.CABLE
                         }
-                    ).on('click', onObjectClick).addTo(objectLayer)
+                    )
                     break
             }
+            polyline.on('click', onObjectClick).addTo(objectLayer)
         }
     )
 }
@@ -648,85 +648,115 @@ function onMapClick(e) {
 }
 
 function onObjectClick() {
-    switch (addingObject) {
-        case AddingObject.DELETE:
-            map.removeLayer(this)
-            switch (this.options.type) {
-                case Building.Type.TPN:
-                case Building.Type.ZTP:
-                case Building.Type.PILLAR:
-                case Building.Type.SUB_STATION:
-                case Building.Type.RP:
-                case Building.Type.DELIMITER:
-                case Building.Type.RECLOSER:
-                    network.buildings.delete(this.options.id)
-                    break
-                case Line.Type.AIR:
-                case Line.Type.CABLE:
-                    network.lines.delete(this.options.id)
-                    break
-            }
-            break
-        case AddingObject.AIR_LINE:
-            if (!linePoint1) { // point 1 is undefined
-                linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
-            } else {
-                linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
-                Leaflet.polyline(
-                    [
-                        [linePoint1.x, linePoint1.y],
-                        [linePoint2.x, linePoint2.y]
-                    ],
-                    {
-                        color: "green",
-                        weight: '2',
-                        dashArray: '5, 4',
-                        id: ++network.maxId,
-                        type: Line.Type.AIR
-                    }
-                ).on('click', onObjectClick).addTo(map)
-                network.lines.set(
-                    network.maxId, 
-                    new Line(
-                        network.maxId,
-                        linePoint1,
-                        linePoint2,
-                        Line.Type.AIR
+    if (editMode) {
+        switch (addingObject) {
+            case AddingObject.DELETE:
+                map.removeLayer(this)
+                switch (this.options.type) {
+                    case Building.Type.TPN:
+                    case Building.Type.ZTP:
+                    case Building.Type.PILLAR:
+                    case Building.Type.SUB_STATION:
+                    case Building.Type.RP:
+                    case Building.Type.DELIMITER:
+                    case Building.Type.RECLOSER:
+                        network.buildings.delete(this.options.id)
+                        break
+                    case Line.Type.AIR:
+                    case Line.Type.CABLE:
+                        network.lines.delete(this.options.id)
+                        break
+                }
+                break
+            case AddingObject.AIR_LINE:
+                if (!linePoint1) { // point 1 is undefined
+                    linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
+                } else {
+                    linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
+                    Leaflet.polyline(
+                        [
+                            [linePoint1.x, linePoint1.y],
+                            [linePoint2.x, linePoint2.y]
+                        ],
+                        {
+                            color: "green",
+                            weight: '2',
+                            dashArray: '5, 4',
+                            id: ++network.maxId,
+                            type: Line.Type.AIR
+                        }
+                    ).on('click', onObjectClick).addTo(map)
+                    network.lines.set(
+                        network.maxId, 
+                        new Line(
+                            network.maxId,
+                            linePoint1,
+                            linePoint2,
+                            Line.Type.AIR
+                        )
                     )
-                )
-                linePoint1 = undefined
-                linePoint2 = undefined
-            }
-            break
-        case AddingObject.CABLE_LINE:
-            if (!linePoint1) { // point 1 is undefined
-                linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
-            } else {
-                linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
-                Leaflet.polyline(
-                    [
-                        [linePoint1.x, linePoint1.y],
-                        [linePoint2.x, linePoint2.y]
-                    ],
-                    {
-                        color: "green",
-                        weight: '2',
-                        id: ++network.maxId,
-                        type: Line.Type.CABLE
-                    }
-                ).on('click', onObjectClick).addTo(map)
-                network.lines.set(
-                    network.maxId, 
-                    new Line(
-                        network.maxId,
-                        linePoint1,
-                        linePoint2,
-                        Line.Type.AIR
+                    linePoint1 = undefined
+                    linePoint2 = undefined
+                }
+                break
+            case AddingObject.CABLE_LINE:
+                if (!linePoint1) { // point 1 is undefined
+                    linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
+                } else {
+                    linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
+                    Leaflet.polyline(
+                        [
+                            [linePoint1.x, linePoint1.y],
+                            [linePoint2.x, linePoint2.y]
+                        ],
+                        {
+                            color: "green",
+                            weight: '2',
+                            id: ++network.maxId,
+                            type: Line.Type.CABLE
+                        }
+                    ).on('click', onObjectClick).addTo(map)
+                    network.lines.set(
+                        network.maxId, 
+                        new Line(
+                            network.maxId,
+                            linePoint1,
+                            linePoint2,
+                            Line.Type.AIR
+                        )
                     )
-                )
-                linePoint1 = undefined
-                linePoint2 = undefined
-            }
-            break
+                    linePoint1 = undefined
+                    linePoint2 = undefined
+                }
+                break
+            case AddingObject.NONE:
+                let building = network.buildings.get(this.options.id)
+                toggleBuildingProperties(building, true)
+                break
+        }
+    } else {
+        let building = network.buildings.get(this.options.id)
+        toggleBuildingProperties(building, false)
     }
+}
+
+function toggleBuildingProperties(building: Building, editMode: boolean) {
+    if (document.getElementById("properties").style.visibility == "visible") {
+        document.getElementById("properties").style.visibility = "hidden"
+    } else {
+        document.getElementById("properties").style.visibility = "visible"
+        var nameInputElement = document.getElementById("dispatcherName")
+        nameInputElement.setAttribute('name', building.id.toString())
+        nameInputElement.setAttribute('value', building.dispatcherName)
+        if (editMode) {
+            nameInputElement.removeAttribute('readonly')
+        } else {
+            nameInputElement.setAttribute('readonly', 'readonly')
+        }
+    }
+}
+
+function inputDispatcherName(id: string, value: string) {
+    var building = network.buildings.get(parseInt(id))
+    building.dispatcherName = value
 }

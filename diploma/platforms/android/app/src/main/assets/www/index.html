@@ -9,6 +9,10 @@
         <title>Leaflet example</title>
     </head>
     <body>
+        <div id="properties">
+            <h1 style="font-size: 16px; font-weight: bold; margin-bottom: 20px;">Диспетчерское наименование</h1>
+            <input id="dispatcherName" type="text" oninput="inputDispatcherName(this.name, this.value)">
+        </div>
         <div id="container">
             <div id="toolbar">
                 <button id="switchModeButton" class="button" onclick="toggleMode()"></button>

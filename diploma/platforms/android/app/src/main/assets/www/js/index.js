@@ -18,10 +18,12 @@ var Network = /** @class */ (function () {
     return Network;
 }());
 var Building = /** @class */ (function () {
-    function Building(id, coordinates, type) {
+    function Building(id, coordinates, type, dispatcherName) {
+        if (dispatcherName === void 0) { dispatcherName = ""; }
         this.id = id;
         this.coordinates = coordinates;
         this.type = type;
+        this.dispatcherName = dispatcherName;
     }
     return Building;
 }());
@@ -211,68 +213,65 @@ function loadNetwork(networkData) {
     });
     objectLayer.clearLayers();
     network.buildings.forEach(function (building, id) {
+        var marker;
         switch (building.type) {
             case Building.Type.RP:
-                Leaflet.marker([building.coordinates.x, building.coordinates.y], {
+                marker = Leaflet.marker([building.coordinates.x, building.coordinates.y], {
                     icon: RP_ICON,
                     id: building.id,
                     type: Building.Type.RP
-                }).on('click', onObjectClick)
-                    .addTo(objectLayer);
+                });
                 break;
             case Building.Type.SUB_STATION:
-                Leaflet.marker([building.coordinates.x, building.coordinates.y], {
+                marker = Leaflet.marker([building.coordinates.x, building.coordinates.y], {
                     icon: SUB_STATION_ICON,
                     id: building.id,
                     type: Building.Type.SUB_STATION
-                }).on('click', onObjectClick)
-                    .addTo(objectLayer);
+                });
                 break;
             case Building.Type.RECLOSER:
-                Leaflet.marker([building.coordinates.x, building.coordinates.y], {
+                marker = Leaflet.marker([building.coordinates.x, building.coordinates.y], {
                     icon: RECLOSER_ICON,
                     id: building.id,
                     type: Building.Type.RECLOSER
-                }).on('click', onObjectClick)
-                    .addTo(objectLayer);
+                });
                 break;
             case Building.Type.DELIMITER:
-                Leaflet.marker([building.coordinates.x, building.coordinates.y], {
+                marker = Leaflet.marker([building.coordinates.x, building.coordinates.y], {
                     icon: DELIMITER_ICON,
                     id: building.id,
                     type: Building.Type.DELIMITER
-                }).on('click', onObjectClick)
-                    .addTo(objectLayer);
+                });
                 break;
             case Building.Type.TPN:
-                Leaflet.marker([building.coordinates.x, building.coordinates.y], {
+                marker = Leaflet.marker([building.coordinates.x, building.coordinates.y], {
                     icon: TPN_ICON,
                     id: building.id,
                     type: Building.Type.TPN
-                }).on('click', onObjectClick)
-                    .addTo(objectLayer);
+                });
                 break;
             case Building.Type.ZTP:
-                Leaflet.marker([building.coordinates.x, building.coordinates.y], {
+                marker = Leaflet.marker([building.coordinates.x, building.coordinates.y], {
                     icon: ZTP_ICON,
                     id: building.id,
                     type: AddingObject.ZTP
-                }).on('click', onObjectClick)
-                    .addTo(objectLayer);
+                });
                 break;
             case Building.Type.PILLAR:
-                Leaflet.marker([building.coordinates.x, building.coordinates.y], {
+                marker = Leaflet.marker([building.coordinates.x, building.coordinates.y], {
                     icon: PILLAR_ICON,
                     id: building.id,
                     type: AddingObject.PILLAR
-                }).on('click', onObjectClick)
-                    .addTo(objectLayer);
+                });
+                break;
         }
+        marker.on('click', onObjectClick).addTo(objectLayer);
     });
     network.lines.forEach(function (line, id) {
-        switch (line.type) {
+        var polyline;
+        switch (polyline.type) {
             case Line.Type.AIR:
-                Leaflet.polyline([
+                polyline = Leaflet.polyline([
                     [line.point1Coordinates.x, line.point1Coordinates.y],
                     [line.point2Coordinates.x, line.point2Coordinates.y]
                 ], {
@@ -281,10 +280,10 @@ function loadNetwork(networkData) {
                     dashArray: '5, 4',
                     id: line.id,
                     type: Line.Type.AIR
-                }).on('click', onObjectClick).addTo(objectLayer);
+                });
                 break;
             case Line.Type.CABLE:
-                Leaflet.polyline([
+                polyline = Leaflet.polyline([
                     [line.point1Coordinates.x, line.point1Coordinates.y],
                     [line.point2Coordinates.x, line.point2Coordinates.y]
                 ], {
@@ -292,9 +291,10 @@ function loadNetwork(networkData) {
                     weight: '2',
                     id: line.id,
                     type: Line.Type.CABLE
-                }).on('click', onObjectClick).addTo(objectLayer);
+                });
                 break;
         }
+        polyline.on('click', onObjectClick).addTo(objectLayer);
     });
 }
 function onLocationFound(e) {
@@ -497,66 +497,97 @@ function onMapClick(e) {
     }
 }
 function onObjectClick() {
-    switch (addingObject) {
-        case AddingObject.DELETE:
-            map.removeLayer(this);
-            switch (this.options.type) {
-                case Building.Type.TPN:
-                case Building.Type.ZTP:
-                case Building.Type.PILLAR:
-                case Building.Type.SUB_STATION:
-                case Building.Type.RP:
-                case Building.Type.DELIMITER:
-                case Building.Type.RECLOSER:
-                    network.buildings.delete(this.options.id);
-                    break;
-                case Line.Type.AIR:
-                case Line.Type.CABLE:
-                    network.lines.delete(this.options.id);
-                    break;
-            }
-            break;
-        case AddingObject.AIR_LINE:
-            if (!linePoint1) { // point 1 is undefined
-                linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
-            }
-            else {
-                linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
-                Leaflet.polyline([
-                    [linePoint1.x, linePoint1.y],
-                    [linePoint2.x, linePoint2.y]
-                ], {
-                    color: "green",
-                    weight: '2',
-                    dashArray: '5, 4',
-                    id: ++network.maxId,
-                    type: Line.Type.AIR
-                }).on('click', onObjectClick).addTo(map);
-                network.lines.set(network.maxId, new Line(network.maxId, linePoint1, linePoint2, Line.Type.AIR));
-                linePoint1 = undefined;
-                linePoint2 = undefined;
-            }
-            break;
-        case AddingObject.CABLE_LINE:
-            if (!linePoint1) { // point 1 is undefined
-                linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
-            }
-            else {
-                linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
-                Leaflet.polyline([
-                    [linePoint1.x, linePoint1.y],
-                    [linePoint2.x, linePoint2.y]
-                ], {
-                    color: "green",
-                    weight: '2',
-                    id: ++network.maxId,
-                    type: Line.Type.CABLE
-                }).on('click', onObjectClick).addTo(map);
-                network.lines.set(network.maxId, new Line(network.maxId, linePoint1, linePoint2, Line.Type.AIR));
-                linePoint1 = undefined;
-                linePoint2 = undefined;
-            }
-            break;
+    if (editMode) {
+        switch (addingObject) {
+            case AddingObject.DELETE:
+                map.removeLayer(this);
+                switch (this.options.type) {
+                    case Building.Type.TPN:
+                    case Building.Type.ZTP:
+                    case Building.Type.PILLAR:
+                    case Building.Type.SUB_STATION:
+                    case Building.Type.RP:
+                    case Building.Type.DELIMITER:
+                    case Building.Type.RECLOSER:
+                        network.buildings.delete(this.options.id);
+                        break;
+                    case Line.Type.AIR:
+                    case Line.Type.CABLE:
+                        network.lines.delete(this.options.id);
+                        break;
+                }
+                break;
+            case AddingObject.AIR_LINE:
+                if (!linePoint1) { // point 1 is undefined
+                    linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
+                }
+                else {
+                    linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
+                    Leaflet.polyline([
+                        [linePoint1.x, linePoint1.y],
+                        [linePoint2.x, linePoint2.y]
+                    ], {
+                        color: "green",
+                        weight: '2',
+                        dashArray: '5, 4',
+                        id: ++network.maxId,
+                        type: Line.Type.AIR
+                    }).on('click', onObjectClick).addTo(map);
+                    network.lines.set(network.maxId, new Line(network.maxId, linePoint1, linePoint2, Line.Type.AIR));
+                    linePoint1 = undefined;
+                    linePoint2 = undefined;
+                }
+                break;
+            case AddingObject.CABLE_LINE:
+                if (!linePoint1) { // point 1 is undefined
+                    linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
+                }
+                else {
+                    linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
+                    Leaflet.polyline([
+                        [linePoint1.x, linePoint1.y],
+                        [linePoint2.x, linePoint2.y]
+                    ], {
+                        color: "green",
+                        weight: '2',
+                        id: ++network.maxId,
+                        type: Line.Type.CABLE
+                    }).on('click', onObjectClick).addTo(map);
+                    network.lines.set(network.maxId, new Line(network.maxId, linePoint1, linePoint2, Line.Type.AIR));
+                    linePoint1 = undefined;
+                    linePoint2 = undefined;
+                }
+                break;
+            case AddingObject.NONE:
+                var building = network.buildings.get(this.options.id);
+                toggleBuildingProperties(building, true);
+                break;
+        }
     }
+    else {
+        var building = network.buildings.get(this.options.id);
+        toggleBuildingProperties(building, false);
+    }
+}
+function toggleBuildingProperties(building, editMode) {
+    if (document.getElementById("properties").style.visibility == "visible") {
+        document.getElementById("properties").style.visibility = "hidden";
+    }
+    else {
+        document.getElementById("properties").style.visibility = "visible";
+        var nameInputElement = document.getElementById("dispatcherName");
+        nameInputElement.setAttribute('name', building.id.toString());
+        nameInputElement.setAttribute('value', building.dispatcherName);
+        if (editMode) {
+            nameInputElement.removeAttribute('readonly');
+        }
+        else {
+            nameInputElement.setAttribute('readonly', 'readonly');
+        }
+    }
+}
+function inputDispatcherName(id, value) {
+    var building = network.buildings.get(parseInt(id));
+    building.dispatcherName = value;
 }
 //# sourceMappingURL=index.js.map

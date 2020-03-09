@@ -3,6 +3,7 @@
     padding: 0;
     border: none;
     outline: none;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 #container {
@@ -96,4 +97,26 @@
 
 #loadButton {
     background-image: url(../img/load.svg);
+}
+
+#properties {
+    position: absolute;
+    width: 400px;
+    bottom: 10px;
+    right: 0;
+    top: 60px;
+    background-color: white;
+    z-index: 500;
+    visibility: hidden;
+    box-shadow: 0 0 10px -2px black;
+    padding: 20px;
+}
+
+#dispatcherName {
+    border: 1px solid gray;
+    line-height: 1.5em;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 5px;
 }
