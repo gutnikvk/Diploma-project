@@ -753,10 +753,50 @@ function toggleBuildingProperties(building: Building, editMode: boolean) {
         } else {
             nameInputElement.setAttribute('readonly', 'readonly')
         }
+        var latInput = document.getElementById("lat")
+        var lngInput = document.getElementById("lng")
+        latInput.setAttribute('name', building.id.toString())
+        latInput.setAttribute('value', building.coordinates.x.toString())
+        if (editMode) {
+            latInput.removeAttribute('readonly')
+        } else {
+            latInput.setAttribute('readonly', 'readonly')
+        }
+        lngInput.setAttribute('name', building.id.toString())
+        lngInput.setAttribute('value', building.coordinates.y.toString())
+        if (editMode) {
+            lngInput.removeAttribute('readonly')
+        } else {
+            lngInput.setAttribute('readonly', 'readonly')
+        }
     }
 }
 
 function inputDispatcherName(id: string, value: string) {
     var building = network.buildings.get(parseInt(id))
     building.dispatcherName = value
+}
+
+function inputLat(id: string, value: string) {
+    var building = network.buildings.get(parseInt(id))
+    building.coordinates.x = Number(value)
+    objectLayer.eachLayer(
+        element => {
+            if (element.options.id == building.id) {
+                element.setLatLng([building.coordinates.x, building.coordinates.y])
+            }
+        }
+    )
+}
+
+function inputLng(id: string, value: string) {
+    var building = network.buildings.get(parseInt(id))
+    building.coordinates.y = Number(value)
+    objectLayer.eachLayer(
+        element => {
+            if (element.options.id == building.id) {
+                element.setLatLng([building.coordinates.x, building.coordinates.y])
+            }
+        }
+    )
 }

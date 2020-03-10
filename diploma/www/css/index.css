@@ -101,7 +101,7 @@
 
 #properties {
     position: absolute;
-    width: 400px;
+    width: 258px;
     bottom: 10px;
     right: 0;
     top: 60px;
@@ -110,13 +110,15 @@
     visibility: hidden;
     box-shadow: 0 0 10px -2px black;
     padding: 20px;
+    font-size: 16px;
 }
 
-#dispatcherName {
+#dispatcherName, #lat, #lng {
     border: 1px solid gray;
     line-height: 1.5em;
     font-size: 16px;
-    width: 100%;
+    width: 250px;
     box-sizing: border-box;
     padding: 5px;
+    margin-bottom: 20px;
 }
