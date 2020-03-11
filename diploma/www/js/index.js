@@ -69,6 +69,22 @@ var AddingObject;
     AddingObject[AddingObject["NONE"] = 9] = "NONE";
     AddingObject[AddingObject["DELETE"] = 10] = "DELETE";
 })(AddingObject || (AddingObject = {}));
+var Journal = /** @class */ (function () {
+    function Journal(userName) {
+        this.userName = userName;
+        this.startDateTime = new Date();
+        this.records = new Array();
+    }
+    return Journal;
+}());
+(function (Journal) {
+    var Record = /** @class */ (function () {
+        function Record() {
+        }
+        return Record;
+    }());
+    Journal.Record = Record;
+})(Journal || (Journal = {}));
 // end defs
 var Leaflet = window['L'];
 var editMode = false;
@@ -315,6 +331,8 @@ function toggleMode() {
         document.getElementById("switchModeButton").style.borderBottom = "5px solid #8de3e3";
         setEditButtonsDisplay("inline-block");
         document.getElementById("journalButton").style.display = "none";
+        if (journalIsOpen)
+            toggleJournal();
     }
     editMode = !editMode;
 }
@@ -322,10 +340,12 @@ function toggleJournal() {
     if (journalIsOpen) {
         document.getElementById("journalButton").style.borderBottom = "none";
         document.getElementById("journal").style.display = "none";
+        document.getElementById("map").style.visibility = "visible";
     }
     else {
         document.getElementById("journalButton").style.borderBottom = "5px solid #8de3e3";
         document.getElementById("journal").style.display = "block";
+        document.getElementById("map").style.visibility = "hidden";
     }
     journalIsOpen = !journalIsOpen;
 }

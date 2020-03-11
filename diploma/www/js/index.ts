@@ -75,6 +75,22 @@ enum AddingObject {
     NONE,
     DELETE
 }
+class Journal {
+    userName: string
+    startDateTime: Date
+    records: Array<Journal.Record>
+    constructor(userName: string) {
+        this.userName = userName
+        this.startDateTime = new Date()
+        this.records = new Array()
+    }
+}
+namespace Journal {
+    export class Record{
+        dateTime: Date
+        content: string
+    }
+}
 // end defs
 
 const Leaflet = window['L']
@@ -392,6 +408,7 @@ function toggleMode() {
         document.getElementById("switchModeButton").style.borderBottom = "5px solid #8de3e3"
         setEditButtonsDisplay("inline-block")
         document.getElementById("journalButton").style.display = "none"
+        if (journalIsOpen) toggleJournal()
     }
     editMode = !editMode
 }
@@ -400,9 +417,11 @@ function toggleJournal() {
     if (journalIsOpen) {
         document.getElementById("journalButton").style.borderBottom = "none"
         document.getElementById("journal").style.display = "none"
+        document.getElementById("map").style.visibility = "visible"
     } else {
         document.getElementById("journalButton").style.borderBottom = "5px solid #8de3e3"
         document.getElementById("journal").style.display = "block"
+        document.getElementById("map").style.visibility = "hidden"
     }
     journalIsOpen = !journalIsOpen
 }

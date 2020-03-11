@@ -142,4 +142,12 @@
     z-index: 1000;
     background-color: white;
     display: none;
+    box-shadow: 0 0 10px -2px black;
+}
+
+#journalTextArea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid gray;
+    height: calc(100% - 50px);
 }
