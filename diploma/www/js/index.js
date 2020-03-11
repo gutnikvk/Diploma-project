@@ -72,6 +72,7 @@ var AddingObject;
 // end defs
 var Leaflet = window['L'];
 var editMode = false;
+var journalIsOpen = false;
 var addingObject = AddingObject.NONE;
 var linePoint1;
 var linePoint2;
@@ -308,12 +309,25 @@ function toggleMode() {
         setEditButtonsBorders("none");
         setEditButtonsDisplay("none");
         addingObject = AddingObject.NONE;
+        document.getElementById("journalButton").style.display = "inline-block";
     }
     else {
         document.getElementById("switchModeButton").style.borderBottom = "5px solid #8de3e3";
         setEditButtonsDisplay("inline-block");
+        document.getElementById("journalButton").style.display = "none";
     }
     editMode = !editMode;
+}
+function toggleJournal() {
+    if (journalIsOpen) {
+        document.getElementById("journalButton").style.borderBottom = "none";
+        document.getElementById("journal").style.display = "none";
+    }
+    else {
+        document.getElementById("journalButton").style.borderBottom = "5px solid #8de3e3";
+        document.getElementById("journal").style.display = "block";
+    }
+    journalIsOpen = !journalIsOpen;
 }
 function addSubStation() {
     setEditButtonsBorders("none");
@@ -489,6 +503,8 @@ function onMapClick(e) {
                 }).on('click', onObjectClick);
                 network.buildings.set(network.maxId, new Building(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng), Building.Type.PILLAR));
                 break;
+            case AddingObject.NONE:
+                toggleBuildingProperties(false);
             default: break;
         }
         if (buildingMarker) {
@@ -560,17 +576,17 @@ function onObjectClick() {
                 break;
             case AddingObject.NONE:
                 var building = network.buildings.get(this.options.id);
-                toggleBuildingProperties(building, true);
+                toggleBuildingProperties(true, building);
                 break;
         }
     }
     else {
         var building = network.buildings.get(this.options.id);
-        toggleBuildingProperties(building, false);
+        toggleBuildingProperties(true, building);
     }
 }
-function toggleBuildingProperties(building, editMode) {
-    if (document.getElementById("properties").style.visibility == "visible") {
+function toggleBuildingProperties(open, building) {
+    if (!open) {
         document.getElementById("properties").style.visibility = "hidden";
     }
     else {
