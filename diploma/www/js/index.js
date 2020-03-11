@@ -143,6 +143,7 @@ document.addEventListener("deviceready", onDeviceReady, false);
 var PATH = "file:///storage/emulated/0";
 var resolveLocalFileSystemURL;
 var chooser;
+var recognition = new window['webkitSpeechRecognition']();
 function onDeviceReady() {
     chooser = window['chooser'];
     resolveLocalFileSystemURL = window['resolveLocalFileSystemURL'];
@@ -155,6 +156,15 @@ function onDeviceReady() {
 map.on('click', onMapClick);
 map.on('locationfound', onLocationFound);
 map.locate({ watch: true, setView: false });
+recognition.onresult = function (event) {
+    var speechToText = event.results[0][0].transcript;
+    var date = new Date();
+    var dateTimeString = date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+    var speechRecognitionString = "" + speechToText.charAt(0).toUpperCase() + speechToText.slice(1) + ".";
+    var result = dateTimeString + "\n" + speechRecognitionString + "\n";
+    document.getElementById("journalTextArea").textContent += result;
+};
+recognition.start();
 function saveFile(createNew) {
     var json = JSON.stringify(network, function (key, value) {
         if (value instanceof Map) {
@@ -348,6 +358,8 @@ function toggleJournal() {
         document.getElementById("map").style.visibility = "hidden";
     }
     journalIsOpen = !journalIsOpen;
+}
+function onJournalInput() {
 }
 function addSubStation() {
     setEditButtonsBorders("none");

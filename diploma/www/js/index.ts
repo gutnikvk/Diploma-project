@@ -173,6 +173,7 @@ document.addEventListener("deviceready", onDeviceReady, false);
 var PATH = "file:///storage/emulated/0"
 var resolveLocalFileSystemURL
 var chooser
+const recognition = new window['webkitSpeechRecognition']()
 
 function onDeviceReady() {
     chooser = window['chooser']
@@ -181,6 +182,7 @@ function onDeviceReady() {
         dir.getDirectory("Diploma", {create:true}, function(dir) {})
     })
     PATH = "file:///storage/emulated/0/Diploma"
+    
 }
 
 
@@ -188,6 +190,16 @@ function onDeviceReady() {
 map.on('click', onMapClick)
 map.on('locationfound', onLocationFound)
 map.locate({watch: true, setView: false})
+
+recognition.onresult = (event) => {
+    let speechToText = event.results[0][0].transcript;
+    let date = new Date()
+    let dateTimeString = `${date.getDate()}.${(date.getMonth()+1)}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+    let speechRecognitionString = `${speechToText.charAt(0).toUpperCase()}${speechToText.slice(1)}.`
+    let result = `${dateTimeString}\n${speechRecognitionString}\n`
+    document.getElementById("journalTextArea").textContent += result
+}
+recognition.start()
 
 function saveFile(createNew: boolean) {
     let json = JSON.stringify(
@@ -424,6 +436,10 @@ function toggleJournal() {
         document.getElementById("map").style.visibility = "hidden"
     }
     journalIsOpen = !journalIsOpen
+}
+
+function onJournalInput() {
+
 }
 
 function addSubStation() {
