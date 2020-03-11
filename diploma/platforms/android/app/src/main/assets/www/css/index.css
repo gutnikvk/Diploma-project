@@ -41,6 +41,13 @@
     background-position: center;
 }
 
+#journalButton {
+    display: inline-block;
+    background-size: 50%;
+    background-position: center;
+    background-image: url(../img/journal.svg);
+}
+
 #addSubStationButton {
     background-image: url(../img/subStationButtonIcon.svg);
 }
@@ -121,4 +128,27 @@
     box-sizing: border-box;
     padding: 5px;
     margin-bottom: 20px;
+}
+
+#journal {
+    line-height: 1.5em;
+    font-size: 16px;
+    position: absolute;
+    top: 50px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 20px;
+    z-index: 1000;
+    background-color: white;
+    display: none;
+    box-shadow: 0 0 10px -2px black;
+}
+
+#journalTextArea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid gray;
+    height: calc(100% - 45px);
+    resize: none;
 }

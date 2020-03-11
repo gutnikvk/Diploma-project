@@ -75,10 +75,27 @@ enum AddingObject {
     NONE,
     DELETE
 }
+class Journal {
+    userName: string
+    startDateTime: Date
+    records: Array<Journal.Record>
+    constructor(userName: string) {
+        this.userName = userName
+        this.startDateTime = new Date()
+        this.records = new Array()
+    }
+}
+namespace Journal {
+    export class Record{
+        dateTime: Date
+        content: string
+    }
+}
 // end defs
 
 const Leaflet = window['L']
 var editMode = false
+var journalIsOpen = false
 
 var addingObject: AddingObject = AddingObject.NONE
 var linePoint1: PointCoordinates
@@ -386,11 +403,27 @@ function toggleMode() {
         setEditButtonsBorders("none")
         setEditButtonsDisplay("none")
         addingObject = AddingObject.NONE
+        document.getElementById("journalButton").style.display = "inline-block"
     } else {
         document.getElementById("switchModeButton").style.borderBottom = "5px solid #8de3e3"
         setEditButtonsDisplay("inline-block")
+        document.getElementById("journalButton").style.display = "none"
+        if (journalIsOpen) toggleJournal()
     }
     editMode = !editMode
+}
+
+function toggleJournal() {
+    if (journalIsOpen) {
+        document.getElementById("journalButton").style.borderBottom = "none"
+        document.getElementById("journal").style.display = "none"
+        document.getElementById("map").style.visibility = "visible"
+    } else {
+        document.getElementById("journalButton").style.borderBottom = "5px solid #8de3e3"
+        document.getElementById("journal").style.display = "block"
+        document.getElementById("map").style.visibility = "hidden"
+    }
+    journalIsOpen = !journalIsOpen
 }
 
 function addSubStation() {
@@ -639,6 +672,8 @@ function onMapClick(e) {
                     )
                 )
                 break
+            case AddingObject.NONE:
+                toggleBuildingProperties(false)
             default: break
         }
         if (buildingMarker) {
@@ -731,17 +766,17 @@ function onObjectClick() {
                 break
             case AddingObject.NONE:
                 let building = network.buildings.get(this.options.id)
-                toggleBuildingProperties(building, true)
+                toggleBuildingProperties(true, building)
                 break
         }
     } else {
         let building = network.buildings.get(this.options.id)
-        toggleBuildingProperties(building, false)
+        toggleBuildingProperties(true, building)
     }
 }
 
-function toggleBuildingProperties(building: Building, editMode: boolean) {
-    if (document.getElementById("properties").style.visibility == "visible") {
+function toggleBuildingProperties(open: boolean, building?: Building) {
+    if (!open) {
         document.getElementById("properties").style.visibility = "hidden"
     } else {
         document.getElementById("properties").style.visibility = "visible"

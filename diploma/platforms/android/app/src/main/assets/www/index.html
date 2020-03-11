@@ -17,9 +17,15 @@
             <h1 style="font-size: 16px; font-weight: bold; margin-bottom: 20px;">Долгота</h1>
             <input id="lng" type="text" oninput="inputLng(this.name, this.value)">°
         </div>
+        <div id="journal">
+            <h1 style="font-size: 16px; font-weight: bold; margin-bottom: 20px;">Журнал</h1>
+            <textarea id="journalTextArea"></textarea>
+        </div>
         <div id="container">
             <div id="toolbar">
                 <button id="switchModeButton" class="button" onclick="toggleMode()"></button>
+                <div style="width: 5px;"></div>
+                <button class="button" id="journalButton" onclick="toggleJournal()"></button>
                 <div style="width: 5px;"></div>
                 <button class="button editButton" id="addSubStationButton" onclick="addSubStation()"></button>
                 <div style="width: 5px;"></div>
