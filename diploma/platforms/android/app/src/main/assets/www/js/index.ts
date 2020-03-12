@@ -179,9 +179,24 @@ function onDeviceReady() {
     chooser = window['chooser']
     resolveLocalFileSystemURL = window['resolveLocalFileSystemURL']
     resolveLocalFileSystemURL(PATH, function(dir) {
-        dir.getDirectory("Diploma", {create:true}, function(dir) {})
+        dir.getDirectory("Krymenergo", {create:true}, function(dir) {})
     })
-    PATH = "file:///storage/emulated/0/Diploma"
+    PATH = "file:///storage/emulated/0/Krymenergo"
+    resolveLocalFileSystemURL(PATH, function(dir) {
+        dir.getFile("journal.txt", {create:true}, function(fileEntry) {
+            fileEntry.file(function (file) {
+                var reader = new FileReader()
+                reader.onerror = function(e) {
+                    alert("Не удалось прочитать файл журнала. Проверьте корректность выбора директории и имени файла")
+                }
+                reader.onloadend = function(e) {
+                    // @ts-ignore
+                    document.getElementById("journalTextArea").value = this.result.toString()
+                }
+                reader.readAsText(file)
+            })
+        })
+    })
     recognition = window['plugins'].speechRecognition
     recognition.isRecognitionAvailable(
         function(available){
@@ -232,8 +247,10 @@ function onresult(result: string) {
     let date = new Date()
     let dateTimeString = `${date.getDate()}.${(date.getMonth()+1)}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
     let speechRecognitionString = `${result[0].charAt(0).toUpperCase()}${result[0].slice(1)}.`
-    let output = `${dateTimeString}\n${speechRecognitionString}\n`
-    document.getElementById("journalTextArea").textContent += output
+    let output = `${dateTimeString}\n${speechRecognitionString}\n\n`
+    // @ts-ignore
+    document.getElementById("journalTextArea").value += output
+    onJournalInput()
     document.getElementById("recordButton").style.border = "none"
 }
 
@@ -257,7 +274,7 @@ function saveFile(createNew: boolean) {
             dir.getFile(fileName, {create:true}, function(fileEntry) {
                 fileEntry.createWriter(function (fileWriter) {
                     fileWriter.onerror = function (e) {
-                        alert("Failed file write: " + e.toString())
+                        alert("Не удалось записать файл сети. Проверьте корректность выбора директории и имени файла")
                     }
                     const dataObj = new Blob([json], { type: 'text/plain' })
             
@@ -274,7 +291,7 @@ function saveFile(createNew: boolean) {
                         dir.getFile(file.name, {create:true}, function(fileEntry) {
                             fileEntry.createWriter(function (fileWriter) {
                                 fileWriter.onerror = function (e) {
-                                    alert("Failed file write: " + e.toString())
+                                    alert("Не удалось записать файл сети. Проверьте корректность выбора директории и имени файла")
                                 }
                                 const dataObj = new Blob([json], { type: 'text/plain' })
                         
@@ -297,7 +314,7 @@ function readNetworkFromFile() {
                         fileEntry.file(function (file) {
                             var reader = new FileReader()
                             reader.onerror = function(e) {
-                                alert("Error: " + e.toString())
+                                alert("Не удалось прочитать файл сети. Проверьте корректность выбора директории и имени файла")
                             }
                             reader.onloadend = function(e) {
                                 loadNetwork(this.result.toString())
@@ -475,7 +492,20 @@ function toggleJournal() {
 }
 
 function onJournalInput() {
-
+    resolveLocalFileSystemURL(PATH, function(dir) {
+        dir.getFile("journal.txt", {create:true}, function(fileEntry) {
+            fileEntry.createWriter(function (fileWriter) {
+                fileWriter.onerror = function (e) {
+                    alert("Не удалось записать файл журнала. Повторите попытку ввода")
+                }
+                // @ts-ignore
+                let info = document.getElementById('journalTextArea').value
+                const dataObj = new Blob([info], { type: 'text/plain;charset=UTF-8' })
+        
+                fileWriter.write(dataObj)
+            })
+        })
+    })
 }
 
 function addSubStation() {

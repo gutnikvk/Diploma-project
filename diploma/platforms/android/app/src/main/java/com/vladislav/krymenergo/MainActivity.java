@@ -17,7 +17,7 @@
        under the License.
  */
 
-package com.vladislav.diploma;
+package com.vladislav.krymenergo;
 
 import android.os.Bundle;
 import org.apache.cordova.*;
