@@ -18,6 +18,9 @@
     <feature name="FileTransfer">
         <param name="android-package" value="org.apache.cordova.filetransfer.FileTransfer" />
     </feature>
+    <feature name="SpeechRecognition">
+        <param name="android-package" value="com.pbakondy.SpeechRecognition" />
+    </feature>
     <feature name="Chooser">
         <param name="android-package" value="com.cyph.cordova.Chooser" />
     </feature>

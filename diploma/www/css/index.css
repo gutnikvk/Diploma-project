@@ -145,10 +145,18 @@
     box-shadow: 0 0 10px -2px black;
 }
 
+#recordButton {
+    background-image: url(../img/record.svg);
+    background-size: 50%;
+    background-position: center;
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+
 #journalTextArea {
     width: 100%;
     box-sizing: border-box;
     border: 1px solid gray;
-    height: calc(100% - 45px);
+    height: calc(100% - 50px);
     resize: none;
 }

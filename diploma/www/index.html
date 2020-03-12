@@ -18,7 +18,10 @@
             <input id="lng" type="text" oninput="inputLng(this.name, this.value)">°
         </div>
         <div id="journal">
-            <h1 style="font-size: 16px; font-weight: bold; margin-bottom: 20px;">Журнал</h1>
+            <div style="height: 50px; vertical-align: middle;">
+                <span style="font-size: 16px; font-weight: bold; display: inline-block; height: auto;">Журнал</span>
+                <button id="recordButton" class="button" onclick="record()"></button>
+            </div>
             <textarea id="journalTextArea" oninput="onJournalInput()"></textarea>
         </div>
         <div id="container">

@@ -25,6 +25,9 @@
     },
     "cordova-plugin-chooser": {
       "PACKAGE_NAME": "com.vladislav.diploma"
+    },
+    "cordova-plugin-speechrecognition": {
+      "PACKAGE_NAME": "com.vladislav.diploma"
     }
   },
   "dependent_plugins": {}

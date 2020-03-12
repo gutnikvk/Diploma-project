@@ -173,7 +173,7 @@ document.addEventListener("deviceready", onDeviceReady, false);
 var PATH = "file:///storage/emulated/0"
 var resolveLocalFileSystemURL
 var chooser
-const recognition = new window['webkitSpeechRecognition']()
+var recognition
 
 function onDeviceReady() {
     chooser = window['chooser']
@@ -182,24 +182,60 @@ function onDeviceReady() {
         dir.getDirectory("Diploma", {create:true}, function(dir) {})
     })
     PATH = "file:///storage/emulated/0/Diploma"
-    
+    recognition = window['plugins'].speechRecognition
+    recognition.isRecognitionAvailable(
+        function(available){
+            if (!available) alert("Распознавание речи недоступно. Проверьте подключение к Интернету")
+            recognition.hasPermission(
+                function (isGranted: boolean) {
+                    if (!isGranted) {
+                        // Request the permission
+                        recognition.requestPermission(
+                            () => {},
+                            function (err){
+                                alert(err)
+                            }
+                        )
+                    }
+                },
+                function(err){
+                    alert(err)
+                }
+            )
+        }, 
+        function(err){
+            alert(err)
+        }
+    )
 }
-
 
 // def methods
 map.on('click', onMapClick)
 map.on('locationfound', onLocationFound)
 map.locate({watch: true, setView: false})
 
-recognition.onresult = (event) => {
-    let speechToText = event.results[0][0].transcript;
+function record(){
+    document.getElementById("recordButton").style.border = "1px solid red"
+    recognition.startListening(
+        onresult,
+        function(err) {
+            alert(err)
+        }, 
+        {
+            language: "ru-RU",
+            showPopup: false
+        }
+    )
+}
+
+function onresult(result: string) {
     let date = new Date()
     let dateTimeString = `${date.getDate()}.${(date.getMonth()+1)}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-    let speechRecognitionString = `${speechToText.charAt(0).toUpperCase()}${speechToText.slice(1)}.`
-    let result = `${dateTimeString}\n${speechRecognitionString}\n`
-    document.getElementById("journalTextArea").textContent += result
+    let speechRecognitionString = `${result[0].charAt(0).toUpperCase()}${result[0].slice(1)}.`
+    let output = `${dateTimeString}\n${speechRecognitionString}\n\n`
+    document.getElementById("journalTextArea").textContent += output
+    document.getElementById("recordButton").style.border = "none"
 }
-recognition.start()
 
 function saveFile(createNew: boolean) {
     let json = JSON.stringify(
@@ -439,7 +475,7 @@ function toggleJournal() {
 }
 
 function onJournalInput() {
-
+    
 }
 
 function addSubStation() {
