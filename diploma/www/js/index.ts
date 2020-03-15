@@ -75,22 +75,6 @@ enum AddingObject {
     NONE,
     DELETE
 }
-class Journal {
-    userName: string
-    startDateTime: Date
-    records: Array<Journal.Record>
-    constructor(userName: string) {
-        this.userName = userName
-        this.startDateTime = new Date()
-        this.records = new Array()
-    }
-}
-namespace Journal {
-    export class Record{
-        dateTime: Date
-        content: string
-    }
-}
 // end defs
 
 const Leaflet = window['L']
@@ -761,6 +745,8 @@ function onMapClick(e) {
         if (buildingMarker) {
                 buildingMarker.addTo(objectLayer)
             }
+    } else {
+        if (addingObject == AddingObject.NONE) toggleBuildingProperties(false)
     }
 }
 

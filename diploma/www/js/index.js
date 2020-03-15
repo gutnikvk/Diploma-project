@@ -69,22 +69,6 @@ var AddingObject;
     AddingObject[AddingObject["NONE"] = 9] = "NONE";
     AddingObject[AddingObject["DELETE"] = 10] = "DELETE";
 })(AddingObject || (AddingObject = {}));
-var Journal = /** @class */ (function () {
-    function Journal(userName) {
-        this.userName = userName;
-        this.startDateTime = new Date();
-        this.records = new Array();
-    }
-    return Journal;
-}());
-(function (Journal) {
-    var Record = /** @class */ (function () {
-        function Record() {
-        }
-        return Record;
-    }());
-    Journal.Record = Record;
-})(Journal || (Journal = {}));
 // end defs
 var Leaflet = window['L'];
 var editMode = false;
@@ -597,6 +581,10 @@ function onMapClick(e) {
         if (buildingMarker) {
             buildingMarker.addTo(objectLayer);
         }
+    }
+    else {
+        if (addingObject == AddingObject.NONE)
+            toggleBuildingProperties(false);
     }
 }
 function onObjectClick() {
