@@ -284,13 +284,13 @@ var FileSystemHandler = /** @class */ (function () {
         this.PATH = "file:///storage/emulated/0";
     }
     FileSystemHandler.prototype.onDeviceReady = function () {
-        this.chooser = window['chooser'];
-        this.resolveLocalFileSystemURL = window['resolveLocalFileSystemURL'];
-        this.resolveLocalFileSystemURL(this.PATH, function (dir) {
+        fileSystemHandler.chooser = window['chooser'];
+        fileSystemHandler.resolveLocalFileSystemURL = window['resolveLocalFileSystemURL'];
+        fileSystemHandler.resolveLocalFileSystemURL(fileSystemHandler.PATH, function (dir) {
             dir.getDirectory("Krymenergo", { create: true }, function (dir) { });
         });
-        this.PATH = "file:///storage/emulated/0/Krymenergo";
-        this.resolveLocalFileSystemURL(this.PATH, function (dir) {
+        fileSystemHandler.PATH = "file:///storage/emulated/0/Krymenergo";
+        fileSystemHandler.resolveLocalFileSystemURL(fileSystemHandler.PATH, function (dir) {
             dir.getFile("journal.txt", { create: true }, function (fileEntry) {
                 fileEntry.file(function (file) {
                     var reader = new FileReader();
@@ -305,14 +305,14 @@ var FileSystemHandler = /** @class */ (function () {
                 });
             });
         });
-        this.recognition = window['plugins'].speechRecognition;
-        this.recognition.isRecognitionAvailable(function (available) {
+        fileSystemHandler.recognition = window['plugins'].speechRecognition;
+        fileSystemHandler.recognition.isRecognitionAvailable(function (available) {
             if (!available)
                 alert("Распознавание речи недоступно. Проверьте подключение к Интернету");
-            this.recognition.hasPermission(function (isGranted) {
+            fileSystemHandler.recognition.hasPermission(function (isGranted) {
                 if (!isGranted) {
                     // Request the permission
-                    this.recognition.requestPermission(function () { }, function (err) {
+                    fileSystemHandler.recognition.requestPermission(function () { }, function (err) {
                         alert(err);
                     });
                 }
@@ -486,7 +486,7 @@ var FileSystemHandler = /** @class */ (function () {
     };
     FileSystemHandler.prototype.record = function () {
         document.getElementById("recordButton").style.border = "1px solid red";
-        this.recognition.startListening(this.onresult, function (err) {
+        fileSystemHandler.recognition.startListening(fileSystemHandler.onresult, function (err) {
             alert(err);
         }, {
             language: "ru-RU",
@@ -500,11 +500,11 @@ var FileSystemHandler = /** @class */ (function () {
         var output = dateTimeString + "\n" + speechRecognitionString + "\n\n";
         // @ts-ignore
         document.getElementById("journalTextArea").value += output;
-        this.onJournalInput();
+        fileSystemHandler.onJournalInput();
         document.getElementById("recordButton").style.border = "none";
     };
     FileSystemHandler.prototype.onJournalInput = function () {
-        this.resolveLocalFileSystemURL(this.PATH, function (dir) {
+        fileSystemHandler.resolveLocalFileSystemURL(fileSystemHandler.PATH, function (dir) {
             dir.getFile("journal.txt", { create: true }, function (fileEntry) {
                 fileEntry.createWriter(function (fileWriter) {
                     fileWriter.onerror = function (e) {

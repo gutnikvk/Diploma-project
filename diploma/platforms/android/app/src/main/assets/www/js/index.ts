@@ -298,19 +298,21 @@ class State {
 }
 
 class FileSystemHandler {
-    PATH = "file:///storage/emulated/0"
+    PATH: string
     resolveLocalFileSystemURL
     chooser
     recognition
-
+    constructor() {
+        this.PATH = "file:///storage/emulated/0"
+    }
     onDeviceReady() {
-        this.chooser = window['chooser']
-        this.resolveLocalFileSystemURL = window['resolveLocalFileSystemURL']
-        this.resolveLocalFileSystemURL(this.PATH, function(dir) {
+        fileSystemHandler.chooser = window['chooser']
+        fileSystemHandler.resolveLocalFileSystemURL = window['resolveLocalFileSystemURL']
+        fileSystemHandler.resolveLocalFileSystemURL(fileSystemHandler.PATH, function(dir) {
             dir.getDirectory("Krymenergo", {create:true}, function(dir) {})
         })
-        this.PATH = "file:///storage/emulated/0/Krymenergo"
-        this.resolveLocalFileSystemURL(this.PATH, function(dir) {
+        fileSystemHandler.PATH = "file:///storage/emulated/0/Krymenergo"
+        fileSystemHandler.resolveLocalFileSystemURL(fileSystemHandler.PATH, function(dir) {
             dir.getFile("journal.txt", {create:true}, function(fileEntry) {
                 fileEntry.file(function (file) {
                     var reader = new FileReader()
@@ -325,15 +327,15 @@ class FileSystemHandler {
                 })
             })
         })
-        this.recognition = window['plugins'].speechRecognition
-        this.recognition.isRecognitionAvailable(
+        fileSystemHandler.recognition = window['plugins'].speechRecognition
+        fileSystemHandler.recognition.isRecognitionAvailable(
             function(available){
                 if (!available) alert("Распознавание речи недоступно. Проверьте подключение к Интернету")
-                this.recognition.hasPermission(
+                fileSystemHandler.recognition.hasPermission(
                     function (isGranted: boolean) {
                         if (!isGranted) {
                             // Request the permission
-                            this.recognition.requestPermission(
+                            fileSystemHandler.recognition.requestPermission(
                                 () => {},
                                 function (err){
                                     alert(err)
@@ -556,8 +558,8 @@ class FileSystemHandler {
 
     record() {
         document.getElementById("recordButton").style.border = "1px solid red"
-        this.recognition.startListening(
-            this.onresult,
+        fileSystemHandler.recognition.startListening(
+            fileSystemHandler.onresult,
             function(err) {
                 alert(err)
             }, 
@@ -575,12 +577,12 @@ class FileSystemHandler {
         let output = `${dateTimeString}\n${speechRecognitionString}\n\n`
         // @ts-ignore
         document.getElementById("journalTextArea").value += output
-        this.onJournalInput()
+        fileSystemHandler.onJournalInput()
         document.getElementById("recordButton").style.border = "none"
     }
         
     onJournalInput() {
-        this.resolveLocalFileSystemURL(this.PATH, function(dir) {
+        fileSystemHandler.resolveLocalFileSystemURL(fileSystemHandler.PATH, function(dir) {
             dir.getFile("journal.txt", {create:true}, function(fileEntry) {
                 fileEntry.createWriter(function (fileWriter) {
                     fileWriter.onerror = function (e) {
