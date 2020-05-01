@@ -11,50 +11,50 @@
     <body>
         <div id="properties">
             <h1 style="font-size: 16px; font-weight: bold; margin-bottom: 20px;">Диспетчерское наименование</h1>
-            <input id="dispatcherName" type="text" oninput="inputDispatcherName(this.name, this.value)">
+            <input id="dispatcherName" type="text" oninput="network.inputDispatcherName(this.name, this.value)">
             <h1 style="font-size: 16px; font-weight: bold; margin-bottom: 20px;">Широта</h1>
-            <input id="lat" type="text" oninput="inputLat(this.name, this.value)">°
+            <input id="lat" type="text" oninput="network.inputLat(this.name, this.value)">°
             <h1 style="font-size: 16px; font-weight: bold; margin-bottom: 20px;">Долгота</h1>
-            <input id="lng" type="text" oninput="inputLng(this.name, this.value)">°
+            <input id="lng" type="text" oninput="network.inputLng(this.name, this.value)">°
         </div>
         <div id="journal">
             <div style="height: 50px; vertical-align: middle;">
                 <span style="font-size: 16px; font-weight: bold; display: inline-block; height: auto;">Журнал</span>
-                <button id="recordButton" class="button" onclick="record()"></button>
+                <button id="recordButton" class="button" onclick="fileSystemHandler.record()"></button>
             </div>
-            <textarea id="journalTextArea" oninput="onJournalInput()"></textarea>
+            <textarea id="journalTextArea" oninput="fileSystemHandler.onJournalInput()"></textarea>
         </div>
         <div id="container">
             <div id="toolbar">
-                <button id="switchModeButton" class="button" onclick="toggleMode()"></button>
+                <button id="switchModeButton" class="button" onclick="state.toggleMode()"></button>
                 <div style="width: 5px;"></div>
-                <button class="button" id="journalButton" onclick="toggleJournal()"></button>
+                <button class="button" id="journalButton" onclick="state.toggleJournal()"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="addSubStationButton" onclick="addSubStation()"></button>
+                <button class="button editButton" id="addSubStationButton" onclick="state.addSubStation()"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="addRpButton" onclick="addRp()"></button>
+                <button class="button editButton" id="addRpButton" onclick="state.addRp()"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="addRecloserButton" onclick="addRecloser()"></button>
+                <button class="button editButton" id="addRecloserButton" onclick="state.addRecloser()"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="addDelimiterButton" onclick="addDelimiter()"></button>
+                <button class="button editButton" id="addDelimiterButton" onclick="state.addDelimiter()"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="addTpnButton" onclick="addTpn()"></button>
+                <button class="button editButton" id="addTpnButton" onclick="state.addTpn()"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="addZtpButton" onclick="addZtp()"></button>
+                <button class="button editButton" id="addZtpButton" onclick="state.addZtp()"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="addPillarButton" onclick="addPillar()"></button>
+                <button class="button editButton" id="addPillarButton" onclick="state.addPillar()"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="addAirLineButton" onclick="addAirLine()"></button>
+                <button class="button editButton" id="addAirLineButton" onclick="state.addAirLine()"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="addCableLineButton" onclick="addCableLine()"></button>
+                <button class="button editButton" id="addCableLineButton" onclick="state.addCableLine()"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="binButton" onclick="deleteObject()"></button>
+                <button class="button editButton" id="binButton" onclick="state.deleteObject()"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="saveButton" onclick="saveFile(false)"></button>
+                <button class="button editButton" id="saveButton" onclick="fileSystemHandler.saveFile(false)"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="newFileButton" onclick="saveFile(true)"></button>
+                <button class="button editButton" id="newFileButton" onclick="fileSystemHandler.saveFile(true)"></button>
                 <div style="width: 5px;"></div>
-                <button class="button editButton" id="loadButton" onclick="readNetworkFromFile()"></button>
+                <button class="button editButton" id="loadButton" onclick="fileSystemHandler.readNetworkFromFile()"></button>
             </div>
             <div id="map"></div>
         </div>
