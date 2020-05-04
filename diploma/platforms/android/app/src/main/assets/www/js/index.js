@@ -92,13 +92,13 @@ var AddingObject;
     AddingObject[AddingObject["NONE"] = 9] = "NONE";
     AddingObject[AddingObject["DELETE"] = 10] = "DELETE";
 })(AddingObject || (AddingObject = {}));
-var State = /** @class */ (function () {
-    function State() {
+var InterfaceHandler = /** @class */ (function () {
+    function InterfaceHandler() {
         this.editMode = false;
         this.journalIsOpen = false;
         this.addingObject = AddingObject.NONE;
     }
-    State.prototype.toggleMode = function () {
+    InterfaceHandler.prototype.toggleMode = function () {
         if (this.editMode) {
             document.getElementById("switchModeButton").style.borderBottom = "none";
             this.setEditButtonsBorders("none");
@@ -115,7 +115,7 @@ var State = /** @class */ (function () {
         }
         this.editMode = !this.editMode;
     };
-    State.prototype.toggleJournal = function () {
+    InterfaceHandler.prototype.toggleJournal = function () {
         if (this.journalIsOpen) {
             document.getElementById("journalButton").style.borderBottom = "none";
             document.getElementById("journal").style.display = "none";
@@ -128,121 +128,121 @@ var State = /** @class */ (function () {
         }
         this.journalIsOpen = !this.journalIsOpen;
     };
-    State.prototype.addSubStation = function () {
+    InterfaceHandler.prototype.addSubStation = function () {
         this.setEditButtonsBorders("none");
-        if (state.addingObject != AddingObject.SUB_STATION) {
-            state.addingObject = AddingObject.SUB_STATION;
+        if (interfaceHandler.addingObject != AddingObject.SUB_STATION) {
+            interfaceHandler.addingObject = AddingObject.SUB_STATION;
             document.getElementById("addSubStationButton").style.borderBottom = "5px solid #8de3e3";
         }
         else {
-            state.addingObject = AddingObject.NONE;
+            interfaceHandler.addingObject = AddingObject.NONE;
         }
     };
-    State.prototype.addRp = function () {
+    InterfaceHandler.prototype.addRp = function () {
         this.setEditButtonsBorders("none");
-        if (state.addingObject != AddingObject.RP) {
-            state.addingObject = AddingObject.RP;
+        if (interfaceHandler.addingObject != AddingObject.RP) {
+            interfaceHandler.addingObject = AddingObject.RP;
             document.getElementById("addRpButton").style.borderBottom = "5px solid #8de3e3";
         }
         else {
-            state.addingObject = AddingObject.NONE;
+            interfaceHandler.addingObject = AddingObject.NONE;
         }
     };
-    State.prototype.addRecloser = function () {
+    InterfaceHandler.prototype.addRecloser = function () {
         this.setEditButtonsBorders("none");
-        if (state.addingObject != AddingObject.RECLOSER) {
-            state.addingObject = AddingObject.RECLOSER;
+        if (interfaceHandler.addingObject != AddingObject.RECLOSER) {
+            interfaceHandler.addingObject = AddingObject.RECLOSER;
             document.getElementById("addRecloserButton").style.borderBottom = "5px solid #8de3e3";
         }
         else {
-            state.addingObject = AddingObject.NONE;
+            interfaceHandler.addingObject = AddingObject.NONE;
         }
     };
-    State.prototype.addDelimiter = function () {
+    InterfaceHandler.prototype.addDelimiter = function () {
         this.setEditButtonsBorders("none");
-        if (state.addingObject != AddingObject.DELIMITER) {
-            state.addingObject = AddingObject.DELIMITER;
+        if (interfaceHandler.addingObject != AddingObject.DELIMITER) {
+            interfaceHandler.addingObject = AddingObject.DELIMITER;
             document.getElementById("addDelimiterButton").style.borderBottom = "5px solid #8de3e3";
         }
         else {
-            state.addingObject = AddingObject.NONE;
+            interfaceHandler.addingObject = AddingObject.NONE;
         }
     };
-    State.prototype.addTpn = function () {
+    InterfaceHandler.prototype.addTpn = function () {
         this.setEditButtonsBorders("none");
-        if (state.addingObject != AddingObject.TPN) {
-            state.addingObject = AddingObject.TPN;
+        if (interfaceHandler.addingObject != AddingObject.TPN) {
+            interfaceHandler.addingObject = AddingObject.TPN;
             document.getElementById("addTpnButton").style.borderBottom = "5px solid #8de3e3";
         }
         else {
-            state.addingObject = AddingObject.NONE;
+            interfaceHandler.addingObject = AddingObject.NONE;
         }
     };
-    State.prototype.addZtp = function () {
+    InterfaceHandler.prototype.addZtp = function () {
         this.setEditButtonsBorders("none");
-        if (state.addingObject != AddingObject.ZTP) {
-            state.addingObject = AddingObject.ZTP;
+        if (interfaceHandler.addingObject != AddingObject.ZTP) {
+            interfaceHandler.addingObject = AddingObject.ZTP;
             document.getElementById("addZtpButton").style.borderBottom = "5px solid #8de3e3";
         }
         else {
-            state.addingObject = AddingObject.NONE;
+            interfaceHandler.addingObject = AddingObject.NONE;
         }
     };
-    State.prototype.addPillar = function () {
+    InterfaceHandler.prototype.addPillar = function () {
         this.setEditButtonsBorders("none");
-        if (state.addingObject != AddingObject.PILLAR) {
-            state.addingObject = AddingObject.PILLAR;
+        if (interfaceHandler.addingObject != AddingObject.PILLAR) {
+            interfaceHandler.addingObject = AddingObject.PILLAR;
             document.getElementById("addPillarButton").style.borderBottom = "5px solid #8de3e3";
         }
         else {
-            state.addingObject = AddingObject.NONE;
+            interfaceHandler.addingObject = AddingObject.NONE;
         }
     };
-    State.prototype.addAirLine = function () {
+    InterfaceHandler.prototype.addAirLine = function () {
         this.setEditButtonsBorders("none");
-        if (state.addingObject != AddingObject.AIR_LINE) {
-            state.addingObject = AddingObject.AIR_LINE;
+        if (interfaceHandler.addingObject != AddingObject.AIR_LINE) {
+            interfaceHandler.addingObject = AddingObject.AIR_LINE;
             document.getElementById("addAirLineButton").style.borderBottom = "5px solid #8de3e3";
         }
         else {
-            state.addingObject = AddingObject.NONE;
+            interfaceHandler.addingObject = AddingObject.NONE;
         }
     };
-    State.prototype.addCableLine = function () {
+    InterfaceHandler.prototype.addCableLine = function () {
         this.setEditButtonsBorders("none");
-        if (state.addingObject != AddingObject.CABLE_LINE) {
-            state.addingObject = AddingObject.CABLE_LINE;
+        if (interfaceHandler.addingObject != AddingObject.CABLE_LINE) {
+            interfaceHandler.addingObject = AddingObject.CABLE_LINE;
             document.getElementById("addCableLineButton").style.borderBottom = "5px solid #8de3e3";
         }
         else {
-            state.addingObject = AddingObject.NONE;
+            interfaceHandler.addingObject = AddingObject.NONE;
         }
     };
-    State.prototype.deleteObject = function () {
+    InterfaceHandler.prototype.deleteObject = function () {
         this.setEditButtonsBorders("none");
-        if (state.addingObject != AddingObject.DELETE) {
-            state.addingObject = AddingObject.DELETE;
+        if (interfaceHandler.addingObject != AddingObject.DELETE) {
+            interfaceHandler.addingObject = AddingObject.DELETE;
             document.getElementById("binButton").style.borderBottom = "5px solid #8de3e3";
         }
         else {
-            state.addingObject = AddingObject.NONE;
+            interfaceHandler.addingObject = AddingObject.NONE;
         }
     };
-    State.prototype.setEditButtonsBorders = function (borderStyle) {
+    InterfaceHandler.prototype.setEditButtonsBorders = function (borderStyle) {
         Array
             .from(document.getElementsByClassName("editButton"))
             .forEach(function (element) {
             element.style.borderBottom = borderStyle;
         });
     };
-    State.prototype.setEditButtonsDisplay = function (display) {
+    InterfaceHandler.prototype.setEditButtonsDisplay = function (display) {
         Array
             .from(document.getElementsByClassName("editButton"))
             .forEach(function (element) {
             element.style.display = display;
         });
     };
-    State.prototype.toggleBuildingProperties = function (open, building) {
+    InterfaceHandler.prototype.toggleBuildingProperties = function (open, building) {
         if (!open) {
             document.getElementById("properties").style.visibility = "hidden";
         }
@@ -277,7 +277,7 @@ var State = /** @class */ (function () {
             }
         }
     };
-    return State;
+    return InterfaceHandler;
 }());
 var FileSystemHandler = /** @class */ (function () {
     function FileSystemHandler() {
@@ -551,7 +551,7 @@ var PILLAR_ICON = Leaflet.icon({
 // end defs
 var map = Leaflet.map('map').setView([55.75, 37.62], 15);
 var objectLayer = Leaflet.layerGroup().addTo(map);
-var state = new State();
+var interfaceHandler = new InterfaceHandler();
 var network = new Network();
 var fileSystemHandler = new FileSystemHandler();
 // init map layers
@@ -581,9 +581,9 @@ function onLocationFound(e) {
     circle.setLatLng(e.latlng).setRadius(radius);
 }
 function onMapClick(e) {
-    if (state.editMode) {
+    if (interfaceHandler.editMode) {
         var buildingMarker;
-        switch (state.addingObject) {
+        switch (interfaceHandler.addingObject) {
             case AddingObject.SUB_STATION:
                 buildingMarker = Leaflet.marker(e.latlng, {
                     icon: SUB_STATION_ICON,
@@ -641,7 +641,7 @@ function onMapClick(e) {
                 network.buildings.set(network.maxId, new Building(network.maxId, new PointCoordinates(e.latlng.lat, e.latlng.lng), Building.Type.PILLAR));
                 break;
             case AddingObject.NONE:
-                state.toggleBuildingProperties(false);
+                interfaceHandler.toggleBuildingProperties(false);
             default: break;
         }
         if (buildingMarker) {
@@ -649,13 +649,13 @@ function onMapClick(e) {
         }
     }
     else {
-        if (state.addingObject == AddingObject.NONE)
-            state.toggleBuildingProperties(false);
+        if (interfaceHandler.addingObject == AddingObject.NONE)
+            interfaceHandler.toggleBuildingProperties(false);
     }
 }
 function onObjectClick() {
-    if (state.editMode) {
-        switch (state.addingObject) {
+    if (interfaceHandler.editMode) {
+        switch (interfaceHandler.addingObject) {
             case AddingObject.DELETE:
                 map.removeLayer(this);
                 switch (this.options.type) {
@@ -675,14 +675,14 @@ function onObjectClick() {
                 }
                 break;
             case AddingObject.AIR_LINE:
-                if (!state.linePoint1) { // point 1 is undefined
-                    state.linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
+                if (!interfaceHandler.linePoint1) { // point 1 is undefined
+                    interfaceHandler.linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
                 }
                 else {
-                    state.linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
+                    interfaceHandler.linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
                     Leaflet.polyline([
-                        [state.linePoint1.x, state.linePoint1.y],
-                        [state.linePoint2.x, state.linePoint2.y]
+                        [interfaceHandler.linePoint1.x, interfaceHandler.linePoint1.y],
+                        [interfaceHandler.linePoint2.x, interfaceHandler.linePoint2.y]
                     ], {
                         color: "green",
                         weight: '2',
@@ -690,40 +690,40 @@ function onObjectClick() {
                         id: ++network.maxId,
                         type: Line.Type.AIR
                     }).on('click', onObjectClick).addTo(map);
-                    network.lines.set(network.maxId, new Line(network.maxId, state.linePoint1, state.linePoint2, Line.Type.AIR));
-                    state.linePoint1 = undefined;
-                    state.linePoint2 = undefined;
+                    network.lines.set(network.maxId, new Line(network.maxId, interfaceHandler.linePoint1, interfaceHandler.linePoint2, Line.Type.AIR));
+                    interfaceHandler.linePoint1 = undefined;
+                    interfaceHandler.linePoint2 = undefined;
                 }
                 break;
             case AddingObject.CABLE_LINE:
-                if (!state.linePoint1) { // point 1 is undefined
-                    state.linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
+                if (!interfaceHandler.linePoint1) { // point 1 is undefined
+                    interfaceHandler.linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
                 }
                 else {
-                    state.linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
+                    interfaceHandler.linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng);
                     Leaflet.polyline([
-                        [state.linePoint1.x, state.linePoint1.y],
-                        [state.linePoint2.x, state.linePoint2.y]
+                        [interfaceHandler.linePoint1.x, interfaceHandler.linePoint1.y],
+                        [interfaceHandler.linePoint2.x, interfaceHandler.linePoint2.y]
                     ], {
                         color: "green",
                         weight: '2',
                         id: ++network.maxId,
                         type: Line.Type.CABLE
                     }).on('click', onObjectClick).addTo(map);
-                    network.lines.set(network.maxId, new Line(network.maxId, state.linePoint1, state.linePoint2, Line.Type.AIR));
-                    state.linePoint1 = undefined;
-                    state.linePoint2 = undefined;
+                    network.lines.set(network.maxId, new Line(network.maxId, interfaceHandler.linePoint1, interfaceHandler.linePoint2, Line.Type.AIR));
+                    interfaceHandler.linePoint1 = undefined;
+                    interfaceHandler.linePoint2 = undefined;
                 }
                 break;
             case AddingObject.NONE:
                 var building = network.buildings.get(this.options.id);
-                state.toggleBuildingProperties(true, building);
+                interfaceHandler.toggleBuildingProperties(true, building);
                 break;
         }
     }
     else {
         var building = network.buildings.get(this.options.id);
-        state.toggleBuildingProperties(true, building);
+        interfaceHandler.toggleBuildingProperties(true, building);
     }
 }
 //# sourceMappingURL=index.js.map

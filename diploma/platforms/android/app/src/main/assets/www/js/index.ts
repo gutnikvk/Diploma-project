@@ -106,7 +106,7 @@ enum AddingObject {
     DELETE
 }
 
-class State {
+class InterfaceHandler {
     addingObject: AddingObject
     editMode: Boolean
     journalIsOpen: Boolean
@@ -150,101 +150,101 @@ class State {
 
     addSubStation() {
         this.setEditButtonsBorders("none")
-        if (state.addingObject != AddingObject.SUB_STATION) {
-            state.addingObject = AddingObject.SUB_STATION
+        if (interfaceHandler.addingObject != AddingObject.SUB_STATION) {
+            interfaceHandler.addingObject = AddingObject.SUB_STATION
             document.getElementById("addSubStationButton").style.borderBottom = "5px solid #8de3e3"
         } else {
-            state.addingObject = AddingObject.NONE
+            interfaceHandler.addingObject = AddingObject.NONE
         }
     }
     
     addRp() {
         this.setEditButtonsBorders("none")
-        if (state.addingObject != AddingObject.RP) {
-            state.addingObject = AddingObject.RP
+        if (interfaceHandler.addingObject != AddingObject.RP) {
+            interfaceHandler.addingObject = AddingObject.RP
             document.getElementById("addRpButton").style.borderBottom = "5px solid #8de3e3"
         } else {
-            state.addingObject = AddingObject.NONE
+            interfaceHandler.addingObject = AddingObject.NONE
         }
     }
     
     addRecloser() {
         this.setEditButtonsBorders("none")
-        if (state.addingObject != AddingObject.RECLOSER) {
-            state.addingObject = AddingObject.RECLOSER
+        if (interfaceHandler.addingObject != AddingObject.RECLOSER) {
+            interfaceHandler.addingObject = AddingObject.RECLOSER
             document.getElementById("addRecloserButton").style.borderBottom = "5px solid #8de3e3"
         } else {
-            state.addingObject = AddingObject.NONE
+            interfaceHandler.addingObject = AddingObject.NONE
         }
     }
     
     addDelimiter() {
         this.setEditButtonsBorders("none")
-        if (state.addingObject != AddingObject.DELIMITER) {
-            state.addingObject = AddingObject.DELIMITER
+        if (interfaceHandler.addingObject != AddingObject.DELIMITER) {
+            interfaceHandler.addingObject = AddingObject.DELIMITER
             document.getElementById("addDelimiterButton").style.borderBottom = "5px solid #8de3e3"
         } else {
-            state.addingObject = AddingObject.NONE
+            interfaceHandler.addingObject = AddingObject.NONE
         }
     }
     
     addTpn() {
         this.setEditButtonsBorders("none")
-        if (state.addingObject != AddingObject.TPN) {
-            state.addingObject = AddingObject.TPN
+        if (interfaceHandler.addingObject != AddingObject.TPN) {
+            interfaceHandler.addingObject = AddingObject.TPN
             document.getElementById("addTpnButton").style.borderBottom = "5px solid #8de3e3"
         } else {
-            state.addingObject = AddingObject.NONE
+            interfaceHandler.addingObject = AddingObject.NONE
         }
     }
     
     addZtp() {
         this.setEditButtonsBorders("none")
-        if (state.addingObject != AddingObject.ZTP) {
-            state.addingObject = AddingObject.ZTP
+        if (interfaceHandler.addingObject != AddingObject.ZTP) {
+            interfaceHandler.addingObject = AddingObject.ZTP
             document.getElementById("addZtpButton").style.borderBottom = "5px solid #8de3e3"
         } else {
-            state.addingObject = AddingObject.NONE
+            interfaceHandler.addingObject = AddingObject.NONE
         }
     }
     
     addPillar() {
         this.setEditButtonsBorders("none")
-        if (state.addingObject != AddingObject.PILLAR) {
-            state.addingObject = AddingObject.PILLAR
+        if (interfaceHandler.addingObject != AddingObject.PILLAR) {
+            interfaceHandler.addingObject = AddingObject.PILLAR
             document.getElementById("addPillarButton").style.borderBottom = "5px solid #8de3e3"
         } else {
-            state.addingObject = AddingObject.NONE
+            interfaceHandler.addingObject = AddingObject.NONE
         }
     }
     
     addAirLine() {
         this.setEditButtonsBorders("none")
-        if (state.addingObject != AddingObject.AIR_LINE) {
-            state.addingObject = AddingObject.AIR_LINE
+        if (interfaceHandler.addingObject != AddingObject.AIR_LINE) {
+            interfaceHandler.addingObject = AddingObject.AIR_LINE
             document.getElementById("addAirLineButton").style.borderBottom = "5px solid #8de3e3"
         } else {
-            state.addingObject = AddingObject.NONE
+            interfaceHandler.addingObject = AddingObject.NONE
         }
     }
     
     addCableLine() {
         this.setEditButtonsBorders("none")
-        if (state.addingObject != AddingObject.CABLE_LINE) {
-            state.addingObject = AddingObject.CABLE_LINE
+        if (interfaceHandler.addingObject != AddingObject.CABLE_LINE) {
+            interfaceHandler.addingObject = AddingObject.CABLE_LINE
             document.getElementById("addCableLineButton").style.borderBottom = "5px solid #8de3e3"
         } else {
-            state.addingObject = AddingObject.NONE
+            interfaceHandler.addingObject = AddingObject.NONE
         }
     }
     
     deleteObject() {
         this.setEditButtonsBorders("none")
-        if (state.addingObject != AddingObject.DELETE) {
-            state.addingObject = AddingObject.DELETE
+        if (interfaceHandler.addingObject != AddingObject.DELETE) {
+            interfaceHandler.addingObject = AddingObject.DELETE
             document.getElementById("binButton").style.borderBottom = "5px solid #8de3e3"
         } else {
-            state.addingObject = AddingObject.NONE
+            interfaceHandler.addingObject = AddingObject.NONE
         }
     }
     
@@ -645,7 +645,7 @@ const PILLAR_ICON = Leaflet.icon(
 
 const map = Leaflet.map('map').setView([55.75, 37.62], 15);
 const objectLayer = Leaflet.layerGroup().addTo(map)
-var state = new State()
+var interfaceHandler = new InterfaceHandler()
 var network = new Network()
 var fileSystemHandler = new FileSystemHandler()
 
@@ -686,9 +686,9 @@ function onLocationFound(e) {
 }
 
 function onMapClick(e) {
-    if (state.editMode) {
+    if (interfaceHandler.editMode) {
         var buildingMarker
-        switch (state.addingObject) {
+        switch (interfaceHandler.addingObject) {
             case AddingObject.SUB_STATION:
                 buildingMarker = Leaflet.marker(
                     e.latlng, 
@@ -816,20 +816,20 @@ function onMapClick(e) {
                 )
                 break
             case AddingObject.NONE:
-                state.toggleBuildingProperties(false)
+                interfaceHandler.toggleBuildingProperties(false)
             default: break
         }
         if (buildingMarker) {
                 buildingMarker.addTo(objectLayer)
             }
     } else {
-        if (state.addingObject == AddingObject.NONE) state.toggleBuildingProperties(false)
+        if (interfaceHandler.addingObject == AddingObject.NONE) interfaceHandler.toggleBuildingProperties(false)
     }
 }
 
 function onObjectClick() {
-    if (state.editMode) {
-        switch (state.addingObject) {
+    if (interfaceHandler.editMode) {
+        switch (interfaceHandler.addingObject) {
             case AddingObject.DELETE:
                 map.removeLayer(this)
                 switch (this.options.type) {
@@ -849,14 +849,14 @@ function onObjectClick() {
                 }
                 break
             case AddingObject.AIR_LINE:
-                if (!state.linePoint1) { // point 1 is undefined
-                    state.linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
+                if (!interfaceHandler.linePoint1) { // point 1 is undefined
+                    interfaceHandler.linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
                 } else {
-                    state.linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
+                    interfaceHandler.linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
                     Leaflet.polyline(
                         [
-                            [state.linePoint1.x, state.linePoint1.y],
-                            [state.linePoint2.x, state.linePoint2.y]
+                            [interfaceHandler.linePoint1.x, interfaceHandler.linePoint1.y],
+                            [interfaceHandler.linePoint2.x, interfaceHandler.linePoint2.y]
                         ],
                         {
                             color: "green",
@@ -870,24 +870,24 @@ function onObjectClick() {
                         network.maxId, 
                         new Line(
                             network.maxId,
-                            state.linePoint1,
-                            state.linePoint2,
+                            interfaceHandler.linePoint1,
+                            interfaceHandler.linePoint2,
                             Line.Type.AIR
                         )
                     )
-                    state.linePoint1 = undefined
-                    state.linePoint2 = undefined
+                    interfaceHandler.linePoint1 = undefined
+                    interfaceHandler.linePoint2 = undefined
                 }
                 break
             case AddingObject.CABLE_LINE:
-                if (!state.linePoint1) { // point 1 is undefined
-                    state.linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
+                if (!interfaceHandler.linePoint1) { // point 1 is undefined
+                    interfaceHandler.linePoint1 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
                 } else {
-                    state.linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
+                    interfaceHandler.linePoint2 = new PointCoordinates(this.getLatLng().lat, this.getLatLng().lng)
                     Leaflet.polyline(
                         [
-                            [state.linePoint1.x, state.linePoint1.y],
-                            [state.linePoint2.x, state.linePoint2.y]
+                            [interfaceHandler.linePoint1.x, interfaceHandler.linePoint1.y],
+                            [interfaceHandler.linePoint2.x, interfaceHandler.linePoint2.y]
                         ],
                         {
                             color: "green",
@@ -900,22 +900,22 @@ function onObjectClick() {
                         network.maxId, 
                         new Line(
                             network.maxId,
-                            state.linePoint1,
-                            state.linePoint2,
+                            interfaceHandler.linePoint1,
+                            interfaceHandler.linePoint2,
                             Line.Type.AIR
                         )
                     )
-                    state.linePoint1 = undefined
-                    state.linePoint2 = undefined
+                    interfaceHandler.linePoint1 = undefined
+                    interfaceHandler.linePoint2 = undefined
                 }
                 break
             case AddingObject.NONE:
                 let building = network.buildings.get(this.options.id)
-                state.toggleBuildingProperties(true, building)
+                interfaceHandler.toggleBuildingProperties(true, building)
                 break
         }
     } else {
         let building = network.buildings.get(this.options.id)
-        state.toggleBuildingProperties(true, building)
+        interfaceHandler.toggleBuildingProperties(true, building)
     }
 }
